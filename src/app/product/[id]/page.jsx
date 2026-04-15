@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ProductActions from './ProductActions';
 import SizeGuide from '@/components/SizeGuide';
+import { getBaseUrl } from '@/lib/baseUrl';
 
 async function getProduct(id) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3003'}/api/products/${id}?demo=true`,
+      `${getBaseUrl()}/api/products/${id}?demo=true`,
       { cache: 'no-store' }
     );
     if (!res.ok) return null;

@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import SkeletonCard from '@/components/SkeletonCard';
+import { getBaseUrl } from '@/lib/baseUrl';
 
 async function getFeaturedProducts() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3003'}/api/products?featured=true&demo=true`,
+      `${getBaseUrl()}/api/products?featured=true&demo=true`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];
