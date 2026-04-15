@@ -66,8 +66,8 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { label: 'All Products', href: '/shop' },
-                { label: 'Men',          href: '/shop?category=Men' },
                 { label: 'Women',        href: '/shop?category=Women' },
+                { label: 'Kid',          href: '/shop?category=Kid' },
                 { label: 'Unisex',       href: '/shop?category=Unisex' },
                 { label: 'Accessories',  href: '/shop?category=Accessories' },
               ].map(({ label, href }) => (
@@ -95,7 +95,7 @@ export default function Footer() {
           </div>
 
           {/* Visit Us */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <h3 className="text-[10px] tracking-[0.4em] uppercase text-zinc-500 mb-5">Visit Us</h3>
             <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">SCHÉIN STORE</p>
             <p className="text-sm text-zinc-400 leading-relaxed mb-4">

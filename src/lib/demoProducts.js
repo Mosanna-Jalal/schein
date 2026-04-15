@@ -2,15 +2,15 @@ const DUMMY_BASE_URL = 'https://dummyjson.com';
 const USD_TO_PKR = 285;
 
 const SCHEIN_TO_DUMMY_CATEGORIES = {
-  Men: ['mens-shirts', 'mens-shoes'],
+  Kid: ['mens-shirts', 'mens-shoes'],
   Women: ['womens-dresses', 'womens-shoes', 'womens-bags', 'womens-jewellery'],
   Unisex: ['tops'],
   Accessories: ['sunglasses', 'mens-watches', 'womens-watches'],
 };
 
 const DUMMY_TO_SCHEIN_CATEGORY = {
-  'mens-shirts': 'Men',
-  'mens-shoes': 'Men',
+  'mens-shirts': 'Kid',
+  'mens-shoes': 'Kid',
   'womens-dresses': 'Women',
   'womens-shoes': 'Women',
   'womens-bags': 'Women',

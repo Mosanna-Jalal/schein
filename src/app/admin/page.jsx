@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const EMPTY_FORM = {
-  name: '', price: '', category: 'Men', description: '',
+  name: '', price: '', category: 'Kid', description: '',
   image: '', featured: false, stock: 100,
 };
 
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                     className="w-full border border-zinc-200 px-3 py-2.5 text-sm focus:outline-none focus:border-black bg-white"
                   >
-                    {['Men', 'Women', 'Unisex', 'Accessories'].map((c) => (
+                    {['Kid', 'Women', 'Unisex', 'Accessories'].map((c) => (
                       <option key={c}>{c}</option>
                     ))}
                   </select>

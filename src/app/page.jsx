@@ -111,16 +111,16 @@ export default async function HomePage() {
                 <ArrowRight size={14} />
               </Link>
               <Link
-                href="/shop?category=Men"
-                className="inline-flex items-center gap-2 border border-white/20 text-white/70 px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
-              >
-                Men
-              </Link>
-              <Link
                 href="/shop?category=Women"
                 className="inline-flex items-center gap-2 border border-white/20 text-white/70 px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
               >
                 Women
+              </Link>
+              <Link
+                href="/shop?category=Kid"
+                className="inline-flex items-center gap-2 border border-white/20 text-white/70 px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
+              >
+                Kid
               </Link>
             </div>
           </div>
@@ -136,8 +136,8 @@ export default async function HomePage() {
       {/* Category strips */}
       <section className="grid grid-cols-1 sm:grid-cols-3 border-y border-zinc-100">
         {[
-          { label: 'Men', desc: 'Sharp essentials', href: '/shop?category=Men' },
           { label: 'Women', desc: 'Refined silhouettes', href: '/shop?category=Women' },
+          { label: 'Kid', desc: 'Young essentials', href: '/shop?category=Kid' },
           { label: 'Unisex', desc: 'Beyond definition', href: '/shop?category=Unisex' },
         ].map((cat, i) => (
           <Link

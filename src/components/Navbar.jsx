@@ -32,8 +32,8 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/shop', label: 'Shop' },
-    { href: '/shop?category=Men', label: 'Men' },
     { href: '/shop?category=Women', label: 'Women' },
+    { href: '/shop?category=Kid', label: 'Kid' },
     { href: '/shop?category=Unisex', label: 'Unisex' },
     { href: '/cart', label: 'Cart' },
   ];

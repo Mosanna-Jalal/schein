@@ -5,13 +5,13 @@ import { X, Ruler, ChevronRight } from 'lucide-react';
 
 // ─── Size chart data ────────────────────────────────────────────────────────
 const SIZE_CHART = {
-  Men: [
-    { size: 'XS', chest: [76, 80], waist: [66, 70], hips: [82, 86],  height: [155, 165] },
-    { size: 'S',  chest: [80, 86], waist: [70, 76], hips: [86, 92],  height: [163, 170] },
-    { size: 'M',  chest: [86, 92], waist: [76, 81], hips: [92, 98],  height: [168, 175] },
-    { size: 'L',  chest: [92, 98], waist: [81, 86], hips: [98, 104], height: [173, 180] },
-    { size: 'XL', chest: [98, 104],waist: [86, 91], hips: [104,110], height: [178, 185] },
-    { size: 'XXL',chest: [104,110],waist: [91, 97], hips: [110,116], height: [183, 192] },
+  Kid: [
+    { size: 'XS', chest: [56, 60], waist: [52, 56], hips: [60, 64],  height: [104, 110] },
+    { size: 'S',  chest: [60, 64], waist: [56, 60], hips: [64, 68],  height: [110, 116] },
+    { size: 'M',  chest: [64, 68], waist: [60, 64], hips: [68, 72],  height: [116, 122] },
+    { size: 'L',  chest: [68, 72], waist: [64, 68], hips: [72, 76],  height: [122, 128] },
+    { size: 'XL', chest: [72, 76], waist: [68, 72], hips: [76, 80],  height: [128, 134] },
+    { size: 'XXL',chest: [76, 80], waist: [72, 76], hips: [80, 84],  height: [134, 140] },
   ],
   Women: [
     { size: 'XS', chest: [76, 80], waist: [58, 62], hips: [84, 88],  height: [150, 160] },
@@ -80,7 +80,7 @@ export default function SizeGuide({ category }) {
   const [open,   setOpen]   = useState(false);
   const [tab,    setTab]    = useState('finder'); // 'finder' | 'chart'
   const [gender, setGender] = useState(
-    category === 'Men' ? 'Men' : category === 'Women' ? 'Women' : 'Unisex'
+    category === 'Kid' ? 'Kid' : category === 'Women' ? 'Women' : 'Unisex'
   );
   const [unit,   setUnit]   = useState('cm'); // 'cm' | 'in'
   const [form,   setForm]   = useState({ chest: '', waist: '', hips: '', height: '' });
@@ -169,7 +169,7 @@ export default function SizeGuide({ category }) {
                   {/* Gender + unit row */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex gap-2">
-                      {['Men', 'Women', 'Unisex'].map((g) => (
+                      {['Kid', 'Women', 'Unisex'].map((g) => (
                         <button
                           key={g}
                           onClick={() => { setGender(g); reset(); }}
