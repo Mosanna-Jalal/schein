@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"require\\('next'\\)\")",
+      "Bash(node -e \"require\\('mongoose'\\)\")",
+      "Bash(node -e \"require\\('lucide-react'\\)\")"
+    ]
+  }
+}
