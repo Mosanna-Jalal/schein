@@ -83,13 +83,6 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Featured badge */}
-        {product.featured && (
-          <div className="absolute top-3 left-3">
-            <span className="text-[10px] tracking-widest uppercase bg-amber-500 text-white px-2 py-1">
-              Featured
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Info */}
