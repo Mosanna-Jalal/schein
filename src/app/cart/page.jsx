@@ -46,7 +46,7 @@ export default function CartPage() {
     await new Promise((r) => setTimeout(r, 500));
 
     const lines = cart.map(
-      (item) => `• ${item.name} x${item.quantity} — Rs. ${(item.price * item.quantity).toLocaleString()}`
+      (item) => `• ${item.name}${item.size ? ` (${item.size})` : ''} x${item.quantity} — Rs. ${(item.price * item.quantity).toLocaleString()}`
     );
     if (couponApplied) lines.push(`\nCoupon: ${couponApplied} (${(discount * 100).toFixed(0)}% off)`);
     lines.push(`\n*Total: Rs. ${finalTotal.toLocaleString()}*`);
@@ -103,7 +103,7 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
             {cart.map((item) => (
-              <div key={item._id} className="flex gap-4 pb-6 border-b border-zinc-100">
+              <div key={item.cartId} className="flex gap-4 pb-6 border-b border-zinc-100">
                 {/* Image */}
                 <Link href={`/product/${item._id}`} className="relative w-24 h-32 shrink-0 bg-zinc-50 overflow-hidden">
                   <Image
@@ -126,6 +126,11 @@ export default function CartPage() {
                   >
                     {item.name}
                   </Link>
+                  {item.size && (
+                    <span className="inline-block mt-1 text-[10px] tracking-widest uppercase bg-zinc-100 text-zinc-500 px-2 py-0.5">
+                      Size: {item.size}
+                    </span>
+                  )}
                   <p className="text-sm font-semibold text-black mt-2">
                     Rs. {item.price.toLocaleString()}
                   </p>
@@ -136,8 +141,8 @@ export default function CartPage() {
                       <button
                         onClick={() =>
                           item.quantity === 1
-                            ? (removeItem(item._id), addToast(`${item.name} removed`))
-                            : updateQty(item._id, item.quantity - 1)
+                            ? (removeItem(item.cartId), addToast(`${item.name} removed`))
+                            : updateQty(item.cartId, item.quantity - 1)
                         }
                         className="w-8 h-8 flex items-center justify-center hover:bg-zinc-100 transition-colors"
                       >
@@ -145,7 +150,7 @@ export default function CartPage() {
                       </button>
                       <span className="w-10 text-center text-sm font-medium">{item.quantity}</span>
                       <button
-                        onClick={() => updateQty(item._id, item.quantity + 1)}
+                        onClick={() => updateQty(item.cartId, item.quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center hover:bg-zinc-100 transition-colors"
                       >
                         <Plus size={13} />
@@ -159,7 +164,7 @@ export default function CartPage() {
                       </span>
                       <button
                         onClick={() => {
-                          removeItem(item._id);
+                          removeItem(item.cartId);
                           addToast(`${item.name} removed`);
                         }}
                         className="text-zinc-300 hover:text-red-500 transition-colors"

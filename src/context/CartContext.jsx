@@ -7,24 +7,28 @@ const CartContext = createContext(null);
 function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existing = state.find((i) => i._id === action.item._id);
+      const existing = state.find((i) => i.cartId === action.item.cartId);
       if (existing) {
         return state.map((i) =>
-          i._id === action.item._id ? { ...i, quantity: i.quantity + 1 } : i
+          i.cartId === action.item.cartId ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
       return [...state, { ...action.item, quantity: 1 }];
     }
     case 'REMOVE_ITEM':
-      return state.filter((i) => i._id !== action.id);
+      return state.filter((i) => i.cartId !== action.cartId);
     case 'UPDATE_QTY':
       return state.map((i) =>
-        i._id === action.id ? { ...i, quantity: Math.max(1, action.qty) } : i
+        i.cartId === action.cartId ? { ...i, quantity: Math.max(1, action.qty) } : i
       );
     case 'CLEAR':
       return [];
     case 'INIT':
-      return action.payload;
+      // Backfill cartId for items saved before this field existed
+      return action.payload.map((i) => ({
+        ...i,
+        cartId: i.cartId || `${i._id}_${i.size || 'one-size'}`,
+      }));
     default:
       return state;
   }
@@ -46,9 +50,12 @@ export function CartProvider({ children }) {
     localStorage.setItem('schein_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addItem = (item) => dispatch({ type: 'ADD_ITEM', item });
-  const removeItem = (id) => dispatch({ type: 'REMOVE_ITEM', id });
-  const updateQty = (id, qty) => dispatch({ type: 'UPDATE_QTY', id, qty });
+  const addItem = (item) => {
+    const cartId = `${item._id}_${item.size || 'one-size'}`;
+    dispatch({ type: 'ADD_ITEM', item: { ...item, cartId } });
+  };
+  const removeItem = (cartId) => dispatch({ type: 'REMOVE_ITEM', cartId });
+  const updateQty = (cartId, qty) => dispatch({ type: 'UPDATE_QTY', cartId, qty });
   const clearCart = () => dispatch({ type: 'CLEAR' });
 
   const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);

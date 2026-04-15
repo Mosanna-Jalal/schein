@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import ProductActions from './ProductActions';
 import SizeGuide from '@/components/SizeGuide';
+import ProductGallery from '@/components/ProductGallery';
 import { getBaseUrl } from '@/lib/baseUrl';
 
 async function getProduct(id) {
@@ -48,24 +48,11 @@ export default async function ProductPage({ params }) {
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
-          {/* Image */}
-          <div className="relative aspect-[3/4] bg-zinc-50 overflow-hidden">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            {product.featured && (
-              <div className="absolute top-4 left-4">
-                <span className="text-[10px] tracking-widest uppercase bg-black text-white px-3 py-1">
-                  Featured
-                </span>
-              </div>
-            )}
-          </div>
+          {/* Image gallery */}
+          <ProductGallery
+            images={product.images?.length ? product.images : [product.image]}
+            name={product.name}
+          />
 
           {/* Details */}
           <div className="flex flex-col">

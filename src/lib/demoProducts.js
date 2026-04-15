@@ -2,23 +2,26 @@ const DUMMY_BASE_URL = 'https://dummyjson.com';
 const USD_TO_PKR = 285;
 
 const SCHEIN_TO_DUMMY_CATEGORIES = {
-  Kid: ['mens-shirts', 'mens-shoes'],
-  Women: ['womens-dresses', 'womens-shoes', 'womens-bags', 'womens-jewellery'],
-  Unisex: ['tops'],
+  Kid:         ['mens-shirts', 'mens-shoes', 'sports-accessories'],
+  Women:       ['womens-dresses', 'womens-shoes', 'womens-bags', 'womens-jewellery', 'skin-care'],
+  Unisex:      ['tops', 'fragrances'],
   Accessories: ['sunglasses', 'mens-watches', 'womens-watches'],
 };
 
 const DUMMY_TO_SCHEIN_CATEGORY = {
-  'mens-shirts': 'Kid',
-  'mens-shoes': 'Kid',
-  'womens-dresses': 'Women',
-  'womens-shoes': 'Women',
-  'womens-bags': 'Women',
-  'womens-jewellery': 'Women',
-  tops: 'Unisex',
-  sunglasses: 'Accessories',
-  'mens-watches': 'Accessories',
-  'womens-watches': 'Accessories',
+  'mens-shirts':       'Kid',
+  'mens-shoes':        'Kid',
+  'sports-accessories':'Kid',
+  'womens-dresses':    'Women',
+  'womens-shoes':      'Women',
+  'womens-bags':       'Women',
+  'womens-jewellery':  'Women',
+  'skin-care':         'Women',
+  tops:                'Unisex',
+  fragrances:          'Unisex',
+  sunglasses:          'Accessories',
+  'mens-watches':      'Accessories',
+  'womens-watches':    'Accessories',
 };
 
 function toPkrPrice(usdPrice) {
@@ -28,6 +31,7 @@ function toPkrPrice(usdPrice) {
 
 function toScheinProduct(item) {
   const image = item.thumbnail || item.images?.[0] || '/window.svg';
+  const images = (item.images?.length ? item.images : [image]).filter(Boolean);
   const category = DUMMY_TO_SCHEIN_CATEGORY[item.category] || 'Unisex';
 
   return {
@@ -36,6 +40,7 @@ function toScheinProduct(item) {
     description: item.description || 'Premium clothing piece.',
     category,
     image,
+    images,
     price: toPkrPrice(item.price),
     featured: (item.rating || 0) >= 4.7 || (item.discountPercentage || 0) >= 15,
     stock: Number.isFinite(item.stock) ? item.stock : 50,
@@ -46,7 +51,7 @@ function toScheinProduct(item) {
 
 async function fetchDummyCategory(category) {
   const res = await fetch(
-    `${DUMMY_BASE_URL}/products/category/${encodeURIComponent(category)}?limit=30`,
+    `${DUMMY_BASE_URL}/products/category/${encodeURIComponent(category)}?limit=100`,
     { cache: 'no-store' }
   );
 
