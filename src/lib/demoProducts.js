@@ -37,7 +37,7 @@ function toScheinProduct(item) {
     category,
     image,
     price: toPkrPrice(item.price),
-    featured: (item.rating || 0) >= 4.9 && (item.discountPercentage || 0) >= 17,
+    featured: (item.rating || 0) >= 4.7 || (item.discountPercentage || 0) >= 15,
     stock: Number.isFinite(item.stock) ? item.stock : 50,
     views: Math.round((item.rating || 0) * 100 + (item.stock || 0)),
     createdAt: new Date(Date.UTC(2025, 0, (item.id % 365) + 1)).toISOString(),
@@ -77,10 +77,7 @@ export async function fetchDummyProducts({
   let products = results.flat().map(toScheinProduct);
 
   if (featured) {
-    products = products
-      .filter((p) => p.featured)
-      .sort((a, b) => b.views - a.views) // best products first
-      .slice(0, 4);                       // hard cap at 4
+    products = products.filter((p) => p.featured);
   }
 
   if (Number.isFinite(minPrice)) {
