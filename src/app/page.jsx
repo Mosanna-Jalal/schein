@@ -35,11 +35,14 @@ export default async function HomePage() {
         {/* Top veil — keeps transparent nav text readable at all times */}
         <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/70 to-transparent pointer-events-none" />
 
-        {/* Ghost brand mark — fills upper void intentionally, hidden on very small screens */}
-        <div className="absolute inset-0 items-center justify-center pointer-events-none select-none overflow-hidden hidden sm:flex">
+        {/* Ghost brand mark — fades in slowly */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+          style={{ animation: 'hero-fade 2s ease-out 0.6s both' }}
+        >
           <span
             className="font-black text-white leading-none tracking-tighter"
-            style={{ fontSize: 'clamp(100px, 20vw, 320px)', opacity: 0.04 }}
+            style={{ fontSize: 'clamp(80px, 38vw, 320px)', opacity: 0.04 }}
           >
             SCHEIN
           </span>
@@ -50,25 +53,56 @@ export default async function HomePage() {
 
         {/* Content — flex column that fills full height, content anchored to bottom */}
         <div className="relative z-10 flex flex-col min-h-screen max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 w-full pt-20 pb-12 sm:pb-20">
-          {/* This flex-1 spacer pushes content to the bottom */}
           <div className="flex-1" />
 
           <div className="max-w-xl">
-            <p className="text-[10px] tracking-[0.5em] uppercase text-amber-500 mb-4">
+            {/* Label — fade up */}
+            <p
+              className="text-[10px] tracking-[0.5em] uppercase text-amber-500 mb-4"
+              style={{ animation: 'hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.15s both' }}
+            >
               New Collection — 2026
             </p>
+
+            {/* Heading — each line clip-reveals from beneath */}
             <h1
               className="font-black text-white leading-[0.92] tracking-tight mb-5"
               style={{ fontSize: 'clamp(40px, 8vw, 110px)' }}
             >
-              Wear the<br />
-              <span className="text-zinc-500">Silence.</span>
+              {/* Line 1 */}
+              <span className="block overflow-hidden">
+                <span
+                  className="block"
+                  style={{ animation: 'hero-reveal 0.9s cubic-bezier(0.22,1,0.36,1) 0.35s both' }}
+                >
+                  Wear the
+                </span>
+              </span>
+              {/* Line 2 */}
+              <span className="block overflow-hidden">
+                <span
+                  className="block text-zinc-500"
+                  style={{ animation: 'hero-reveal 0.9s cubic-bezier(0.22,1,0.36,1) 0.5s both' }}
+                >
+                  Silence.
+                </span>
+              </span>
             </h1>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-xs">
+
+            {/* Description — fade up */}
+            <p
+              className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-xs"
+              style={{ animation: 'hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.75s both' }}
+            >
               Premium minimalist clothing crafted with intention.
               Less noise, more presence.
             </p>
-            <div className="flex flex-wrap gap-3">
+
+            {/* Buttons — fade up last */}
+            <div
+              className="flex flex-wrap gap-3"
+              style={{ animation: 'hero-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.95s both' }}
+            >
               <Link
                 href="/shop"
                 className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-zinc-100 active:scale-95 transition-all duration-200"
@@ -182,24 +216,66 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* WhatsApp CTA */}
-      <section className="bg-black text-white py-20 text-center border-t border-white/5">
-        <p className="text-[9px] tracking-[0.5em] uppercase text-zinc-600 mb-5">Personal Service</p>
-        <h2 className="font-black text-white mb-5 tracking-tight" style={{ fontSize: 'clamp(28px, 5vw, 52px)' }}>
-          Order via WhatsApp
-        </h2>
-        <p className="text-zinc-500 mb-10 max-w-sm mx-auto text-sm leading-relaxed">
-          Build your cart, hit checkout, and we'll confirm your order directly. Fast and personal.
-        </p>
-        <a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '917301580009'}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 bg-white text-black px-9 py-4 text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-zinc-100 active:scale-95 transition-all duration-200"
-        >
-          Chat on WhatsApp
-          <ArrowRight size={14} />
-        </a>
+      {/* Map + WhatsApp — split section */}
+      <section className="grid grid-cols-1 lg:grid-cols-[41%_59%] min-h-[390px]">
+
+        {/* Left — Google Maps */}
+        <div className="bg-zinc-950 flex items-center justify-center p-6 lg:p-10 h-[300px] lg:h-auto">
+          <div className="relative w-full h-full overflow-hidden shadow-2xl ring-1 ring-white/10">
+            <iframe
+              title="SCHÉIN STORE location"
+              src="https://maps.google.com/maps?q=Gate+no-3+near+MI+Plaza+opposite+Gaya+Club+White+House+Compound+Judges+Colony+Gaya+Bihar+823001&output=embed&z=16"
+              width="100%"
+              height="100%"
+              className="absolute inset-0 w-full h-full"
+              style={{ border: 0, filter: 'grayscale(20%) contrast(1.05) brightness(0.97)' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            {/* Address chip over map */}
+            <div className="absolute bottom-4 left-4 right-4 sm:right-auto bg-white/95 backdrop-blur-sm px-4 py-3 shadow-lg max-w-xs">
+              <p className="text-[9px] tracking-[0.3em] uppercase text-amber-500 mb-0.5">SCHÉIN STORE</p>
+              <p className="text-xs text-zinc-600 leading-relaxed">
+                Gate no-3, near M I Plaza, opp. Gaya Club,<br />
+                Judges Colony, Gaya, Bihar 823001
+              </p>
+              <a
+                href="https://maps.google.com/?q=Gate+no-3+SCHEIN+STORE+near+MI+Plaza+opposite+Gaya+Club+White+House+Compound+Judges+Colony+Gaya+Bihar+823001"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-black font-semibold mt-2 hover:text-amber-600 transition-colors"
+              >
+                Get Directions <ArrowRight size={11} />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — WhatsApp CTA */}
+        <div className="bg-black text-white flex flex-col items-center justify-center text-center px-8 py-20">
+          <p className="text-[9px] tracking-[0.5em] uppercase text-zinc-600 mb-5">Personal Service</p>
+          <h2 className="font-black text-white mb-5 tracking-tight" style={{ fontSize: 'clamp(28px, 5vw, 48px)' }}>
+            Order via WhatsApp
+          </h2>
+          <p className="text-zinc-500 mb-4 max-w-xs text-sm leading-relaxed">
+            Build your cart, hit checkout, and we'll confirm your order directly. Fast and personal.
+          </p>
+          <div className="flex items-center gap-2 mb-10">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs text-zinc-500">Mon – Sun · 10 AM – 10 PM</span>
+          </div>
+          <a
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '917301580009'}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2.5 bg-white text-black px-9 py-4 text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-zinc-100 active:scale-95 transition-all duration-200"
+          >
+            Chat on WhatsApp
+            <ArrowRight size={14} />
+          </a>
+        </div>
+
       </section>
     </main>
   );

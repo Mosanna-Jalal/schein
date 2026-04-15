@@ -71,6 +71,23 @@ body {
   animation: fade-in 0.3s ease-out forwards;
 }
 
+/* ── Hero entrance animations ─────────────────────────────────── */
+/* Clip-reveal: line slides up from behind its own overflow:hidden parent */
+@keyframes hero-reveal {
+  from { transform: translateY(108%); }
+  to   { transform: translateY(0); }
+}
+/* Gentle fade-up for supporting elements */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Pure fade for background / decorative elements */
+@keyframes hero-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* Navigation loader underline */
 @keyframes schein-loader-line {
   0%   { width: 0;      opacity: 0; }
