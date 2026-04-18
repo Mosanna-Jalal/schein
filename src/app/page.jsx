@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import SkeletonCard from '@/components/SkeletonCard';
+import NewsletterSection from '@/components/NewsletterSection';
 import { getBaseUrl } from '@/lib/baseUrl';
 
 async function getFeaturedProducts() {
@@ -215,6 +216,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Newsletter */}
+      <NewsletterSection />
 
       {/* Map + WhatsApp — split section */}
       <section className="grid grid-cols-1 lg:grid-cols-[41%_59%] min-h-[390px]">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import FooterNewsletter from './FooterNewsletter';
 
 // Inline SVG icons — no extra dependency needed
 function InstagramIcon() {
@@ -58,6 +59,12 @@ export default function Footer() {
                 </a>
               ))}
             </div>
+
+            {/* Newsletter */}
+            <div className="mt-8">
+              <p className="text-[9px] tracking-[0.4em] uppercase text-zinc-500 mb-2">Newsletter</p>
+              <FooterNewsletter />
+            </div>
           </div>
 
           {/* Shop */}
@@ -84,6 +91,11 @@ export default function Footer() {
           <div>
             <h3 className="text-[10px] tracking-[0.4em] uppercase text-zinc-500 mb-5">Info</h3>
             <ul className="space-y-3">
+              <li>
+                <Link href="/franchise" className="text-sm text-amber-500 hover:text-amber-400 transition-colors font-medium">
+                  Franchise Opportunity
+                </Link>
+              </li>
               {['About Us', 'Size Guide', 'Shipping & Returns', 'FAQ', 'Contact'].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">

@@ -35,6 +35,7 @@ export default function Navbar() {
     { href: '/shop?category=Women', label: 'Women' },
     { href: '/shop?category=Kid', label: 'Kid' },
     { href: '/shop?category=Unisex', label: 'Unisex' },
+    { href: '/franchise', label: 'Franchise' },
     { href: '/cart', label: 'Cart' },
   ];
 

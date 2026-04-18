@@ -28,6 +28,12 @@ export default function AdminDashboard() {
   const [deleteId, setDeleteId] = useState(null);
   const [toast, setToast] = useState(null);
   const [formError, setFormError] = useState('');
+  const [newsletter, setNewsletter] = useState({ subject: '', message: '' });
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(null);
+  const [franchiseInquiries, setFranchiseInquiries] = useState([]);
+  const [franchiseLoading, setFranchiseLoading] = useState(false);
+  const [franchiseLoaded, setFranchiseLoaded] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -320,6 +326,165 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Newsletter Broadcast */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="bg-white border border-zinc-100 mt-8">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold tracking-widest uppercase text-zinc-700">Newsletter Broadcast</h2>
+              {subscriberCount !== null && (
+                <p className="text-xs text-zinc-400 mt-0.5">{subscriberCount} subscriber{subscriberCount !== 1 ? 's' : ''}</p>
+              )}
+            </div>
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/newsletter/subscribers');
+                const data = await res.json();
+                setSubscriberCount(data.count ?? 0);
+              }}
+              className="text-[10px] tracking-widest uppercase text-zinc-400 hover:text-black transition-colors"
+            >
+              Check Count
+            </button>
+          </div>
+
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="text-[10px] tracking-widest uppercase text-zinc-400 block mb-2">Subject</label>
+              <input
+                type="text"
+                value={newsletter.subject}
+                onChange={(e) => setNewsletter({ ...newsletter, subject: e.target.value })}
+                placeholder="New Collection — Summer 2026"
+                className="w-full border border-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-black"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] tracking-widest uppercase text-zinc-400 block mb-2">Message</label>
+              <textarea
+                value={newsletter.message}
+                onChange={(e) => setNewsletter({ ...newsletter, message: e.target.value })}
+                placeholder="Write your message to subscribers here..."
+                rows={6}
+                className="w-full border border-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-black resize-none"
+              />
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-zinc-400">Email will be sent to all subscribers instantly.</p>
+              <button
+                onClick={async () => {
+                  if (!newsletter.subject.trim() || !newsletter.message.trim()) {
+                    showToast('Subject and message are required', 'error');
+                    return;
+                  }
+                  setNewsletterLoading(true);
+                  try {
+                    const res = await fetch('/api/newsletter/broadcast', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(newsletter),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      showToast(`Sent to ${data.sent} subscriber${data.sent !== 1 ? 's' : ''}`);
+                      setNewsletter({ subject: '', message: '' });
+                    } else {
+                      showToast(data.error || 'Failed to send', 'error');
+                    }
+                  } catch {
+                    showToast('Network error', 'error');
+                  }
+                  setNewsletterLoading(false);
+                }}
+                disabled={newsletterLoading}
+                className="flex items-center gap-2 bg-black text-white px-6 py-3 text-xs tracking-widest uppercase hover:bg-zinc-800 transition-colors disabled:opacity-60"
+              >
+                {newsletterLoading ? (
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Send to All Subscribers'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Franchise Inquiries */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="bg-white border border-zinc-100 mt-8">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <h2 className="text-sm font-semibold tracking-widest uppercase text-zinc-700">Franchise Inquiries</h2>
+            <button
+              onClick={async () => {
+                setFranchiseLoading(true);
+                const res = await fetch('/api/franchise');
+                const data = await res.json();
+                if (data.success) { setFranchiseInquiries(data.inquiries); setFranchiseLoaded(true); }
+                setFranchiseLoading(false);
+              }}
+              className="flex items-center gap-2 text-xs tracking-widest uppercase text-zinc-400 hover:text-black transition-colors"
+            >
+              {franchiseLoading
+                ? <span className="w-3 h-3 border border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
+                : franchiseLoaded ? 'Refresh' : 'Load Inquiries'}
+            </button>
+          </div>
+
+          {!franchiseLoaded ? (
+            <div className="px-6 py-10 text-center text-zinc-400 text-sm">Click "Load Inquiries" to view submissions.</div>
+          ) : franchiseInquiries.length === 0 ? (
+            <div className="px-6 py-10 text-center text-zinc-400 text-sm">No franchise inquiries yet.</div>
+          ) : (
+            <div className="divide-y divide-zinc-50">
+              {franchiseInquiries.map((inq) => (
+                <div key={inq._id} className="px-6 py-5 flex flex-col sm:flex-row sm:items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <p className="font-semibold text-black text-sm">{inq.name}</p>
+                      <span className={`text-[9px] tracking-widest uppercase px-2 py-0.5 ${
+                        inq.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        inq.status === 'rejected' ? 'bg-red-100 text-red-600' :
+                        inq.status === 'contacted' ? 'bg-blue-100 text-blue-600' :
+                        'bg-amber-100 text-amber-700'
+                      }`}>{inq.status}</span>
+                    </div>
+                    <p className="text-xs text-zinc-500">{inq.email} · {inq.phone}</p>
+                    <p className="text-xs text-zinc-500">{inq.city}, {inq.state} · {inq.investment}</p>
+                    {inq.spaceArea && <p className="text-xs text-zinc-400 mt-0.5">Space: {inq.spaceArea}</p>}
+                    {inq.experience && <p className="text-xs text-zinc-400">Experience: {inq.experience}</p>}
+                    {inq.message && <p className="text-xs text-zinc-400 mt-1 italic">"{inq.message}"</p>}
+                    <p className="text-[10px] text-zinc-300 mt-1">{new Date(inq.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    {['new','contacted','approved','rejected'].map((s) => (
+                      <button
+                        key={s}
+                        onClick={async () => {
+                          await fetch('/api/franchise', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: inq._id, status: s }),
+                          });
+                          setFranchiseInquiries((prev) =>
+                            prev.map((i) => i._id === inq._id ? { ...i, status: s } : i)
+                          );
+                        }}
+                        className={`text-[9px] tracking-widest uppercase px-2 py-1 border transition-colors ${
+                          inq.status === s ? 'bg-black text-white border-black' : 'border-zinc-200 text-zinc-400 hover:border-zinc-500 hover:text-black'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
