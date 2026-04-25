@@ -3,6 +3,7 @@ import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { WishlistProvider } from '@/context/WishlistContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { CustomerProvider } from '@/context/CustomerContext';
 import RootContent from '@/components/RootContent';
 import OfferPopup from '@/components/OfferPopup';
 
@@ -29,14 +30,16 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased">
-        <CartProvider>
-          <WishlistProvider>
-            <ToastProvider>
-              <OfferPopup />
-              <RootContent>{children}</RootContent>
-            </ToastProvider>
-          </WishlistProvider>
-        </CartProvider>
+        <CustomerProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <ToastProvider>
+                <OfferPopup />
+                <RootContent>{children}</RootContent>
+              </ToastProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </CustomerProvider>
       </body>
     </html>
   );

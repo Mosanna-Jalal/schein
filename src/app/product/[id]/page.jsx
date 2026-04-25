@@ -9,7 +9,7 @@ import { getBaseUrl } from '@/lib/baseUrl';
 async function getProduct(id) {
   try {
     const res = await fetch(
-      `${getBaseUrl()}/api/products/${id}?demo=true`,
+      `${getBaseUrl()}/api/products/${id}`,
       { cache: 'no-store' }
     );
     if (!res.ok) return null;

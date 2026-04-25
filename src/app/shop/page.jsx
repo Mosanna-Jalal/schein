@@ -28,6 +28,13 @@ function ShopContent() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [showWishlist, setShowWishlist] = useState(searchParams.get('wishlist') === 'true');
 
+  useEffect(() => {
+    const urlCategory = searchParams.get('category') || 'All';
+    const match = CATEGORIES.find((c) => c.toLowerCase() === urlCategory.toLowerCase()) || 'All';
+    setCategory(match);
+    setShowWishlist(searchParams.get('wishlist') === 'true');
+  }, [searchParams]);
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,7 +45,7 @@ function ShopContent() {
       params.set('order', sortOrder);
       params.set('minPrice', priceRange[0]);
       params.set('maxPrice', priceRange[1]);
-      params.set('demo', 'true');
+      params.set('merged', 'true');
 
       const res = await fetch(`/api/products?${params.toString()}`);
       const data = await res.json();
@@ -108,7 +115,14 @@ function ShopContent() {
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
-                  onClick={() => setCategory(c)}
+                  onClick={() => {
+                    setCategory(c);
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (c === 'All') params.delete('category');
+                    else params.set('category', c);
+                    const qs = params.toString();
+                    router.replace(qs ? `/shop?${qs}` : '/shop', { scroll: false });
+                  }}
                   className={`text-[11px] tracking-widest uppercase px-4 py-2 transition-colors ${
                     category === c
                       ? 'bg-amber-500 text-white'

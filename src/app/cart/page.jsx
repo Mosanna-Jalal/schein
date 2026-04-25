@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
+import { useCustomer } from '@/context/CustomerContext';
 
 // Dummy coupon codes
 const COUPONS = {
@@ -17,6 +18,7 @@ const COUPONS = {
 export default function CartPage() {
   const { cart, removeItem, updateQty, clearCart, total, count } = useCart();
   const { addToast } = useToast();
+  const { customer } = useCustomer();
   const [coupon, setCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
   const [couponApplied, setCouponApplied] = useState('');
@@ -103,7 +105,7 @@ export default function CartPage() {
           const verify = await fetch('/api/orders/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response),
+            body: JSON.stringify({ ...response, cartItems: cart, amount: finalTotal, customerId: customer?._id || null }),
           });
           const result = await verify.json();
           if (result.success) {

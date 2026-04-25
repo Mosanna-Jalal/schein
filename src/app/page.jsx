@@ -8,7 +8,7 @@ import { getBaseUrl } from '@/lib/baseUrl';
 async function getFeaturedProducts() {
   try {
     const res = await fetch(
-      `${getBaseUrl()}/api/products?featured=true&demo=true`,
+      `${getBaseUrl()}/api/products?featured=true&merged=true`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];

@@ -15,7 +15,9 @@ export async function GET(request) {
     const sort = searchParams.get('sort') || 'createdAt';
     const order = searchParams.get('order') === 'asc' ? 'asc' : 'desc';
 
-    if (demo) {
+    const merged = searchParams.get('merged') === 'true';
+
+    if (demo && !merged) {
       const products = await fetchDummyProducts({
         category: category || 'All',
         featured: featured === 'true',
@@ -24,14 +26,12 @@ export async function GET(request) {
         sort,
         order,
       });
-
       return Response.json({ success: true, products, source: 'dummyjson' });
     }
 
     await connectDB();
 
     const filter = {};
-
     if (category && category !== 'All') filter.category = category;
     if (featured === 'true') filter.featured = true;
     if (minPrice || maxPrice) {
@@ -40,8 +40,25 @@ export async function GET(request) {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const products = await Product.find(filter).sort({ [sort]: order === 'asc' ? 1 : -1 }).lean();
-    return Response.json({ success: true, products });
+    const dbProducts = await Product.find(filter).sort({ [sort]: order === 'asc' ? 1 : -1 }).lean();
+
+    if (merged) {
+      // Fetch demo products and append after DB products
+      const demoProducts = await fetchDummyProducts({
+        category: category || 'All',
+        featured: featured === 'true',
+        minPrice: minPrice ? Number(minPrice) : undefined,
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        sort,
+        order,
+      });
+      // Exclude demo products whose names clash with DB products
+      const dbNames = new Set(dbProducts.map((p) => p.name.toLowerCase()));
+      const filtered = demoProducts.filter((p) => !dbNames.has(p.name.toLowerCase()));
+      return Response.json({ success: true, products: [...dbProducts, ...filtered], source: 'merged' });
+    }
+
+    return Response.json({ success: true, products: dbProducts });
   } catch (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }

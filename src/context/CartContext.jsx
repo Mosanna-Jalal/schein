@@ -9,6 +9,8 @@ function cartReducer(state, action) {
     case 'ADD_ITEM': {
       const existing = state.find((i) => i.cartId === action.item.cartId);
       if (existing) {
+        const max = existing.stock ?? 999;
+        if (existing.quantity >= max) return state;
         return state.map((i) =>
           i.cartId === action.item.cartId ? { ...i, quantity: i.quantity + 1 } : i
         );
@@ -19,7 +21,9 @@ function cartReducer(state, action) {
       return state.filter((i) => i.cartId !== action.cartId);
     case 'UPDATE_QTY':
       return state.map((i) =>
-        i.cartId === action.cartId ? { ...i, quantity: Math.max(1, action.qty) } : i
+        i.cartId === action.cartId
+          ? { ...i, quantity: Math.min(Math.max(1, action.qty), i.stock ?? 999) }
+          : i
       );
     case 'CLEAR':
       return [];

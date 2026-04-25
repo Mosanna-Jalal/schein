@@ -103,6 +103,11 @@ export default function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link href="/admin" className="text-sm text-zinc-600 hover:text-zinc-400 transition-colors">
+                  Admin
+                </Link>
+              </li>
             </ul>
           </div>
 

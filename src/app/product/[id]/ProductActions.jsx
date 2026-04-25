@@ -26,6 +26,7 @@ export default function ProductActions({ product }) {
   const [size, setSize] = useState(null);
   const [sizeError, setSizeError] = useState(false);
   const wishlisted = isWishlisted(product._id);
+  const isOutOfStock = product.stock === 0;
 
   const handleAdd = async () => {
     if (!size) {
@@ -83,10 +84,16 @@ export default function ProductActions({ product }) {
       <div className="flex gap-3">
         <button
           onClick={handleAdd}
-          disabled={loading}
-          className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-4 text-[11px] tracking-[0.2em] uppercase hover:bg-zinc-800 active:scale-[0.98] transition-all disabled:opacity-60"
+          disabled={loading || isOutOfStock}
+          className={`flex-1 flex items-center justify-center gap-2 py-4 text-[11px] tracking-[0.2em] uppercase transition-all active:scale-[0.98] disabled:opacity-60 ${
+            isOutOfStock
+              ? 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+              : 'bg-black text-white hover:bg-zinc-800'
+          }`}
         >
-          {loading ? (
+          {isOutOfStock ? (
+            'Out of Stock'
+          ) : loading ? (
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>

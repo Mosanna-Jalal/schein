@@ -111,7 +111,7 @@ export default function SizeGuide({ category }) {
     setResult(null);
   };
 
-  const chart = SIZE_CHART[gender];
+  const chart = SIZE_CHART[gender] || SIZE_CHART.Unisex;
 
   return (
     <>
@@ -282,7 +282,7 @@ export default function SizeGuide({ category }) {
                 <div>
                   {/* Gender selector */}
                   <div className="flex gap-2 mb-6">
-                    {['Men', 'Women', 'Unisex'].map((g) => (
+                    {['Kid', 'Women', 'Unisex'].map((g) => (
                       <button
                         key={g}
                         onClick={() => setGender(g)}

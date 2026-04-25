@@ -24,6 +24,7 @@ export async function POST(request) {
 
     return Response.json({ success: true, orderId: order.id, amount: order.amount });
   } catch (error) {
+    console.error('Razorpay error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }

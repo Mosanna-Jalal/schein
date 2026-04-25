@@ -11,6 +11,7 @@ const ProductSchema = new mongoose.Schema(
       enum: ['Kid', 'Women', 'Unisex', 'Accessories'],
     },
     image: { type: String, required: true },
+    images: [{ type: String }],
     featured: { type: Boolean, default: false },
     stock: { type: Number, default: 100 },
     views: { type: Number, default: 0 },

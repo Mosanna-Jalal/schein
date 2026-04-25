@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation';
 import { ShoppingBag, Heart, Menu, X, User, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
+import { useCustomer } from '@/context/CustomerContext';
 
 export default function Navbar() {
   const { count } = useCart();
   const { wishlist } = useWishlist();
+  const { customer } = useCustomer();
   const pathname = usePathname();
   const isHome = pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -109,13 +111,16 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link href="/admin" className="p-1 group hidden sm:block">
+              <Link href="/account" className="relative p-1 group hidden sm:block">
                 <User
                   size={18}
                   className={`transition-colors duration-300 ${
                     isTransparent ? 'text-white/70 hover:text-white' : 'text-zinc-700 hover:text-black'
                   }`}
                 />
+                {customer && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white" />
+                )}
               </Link>
 
               {/* Mobile hamburger */}
@@ -202,12 +207,12 @@ export default function Navbar() {
               </Link>
               <span className="text-zinc-700">·</span>
               <Link
-                href="/admin"
+                href="/account"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-zinc-500 hover:text-white transition-colors"
               >
                 <User size={14} />
-                Admin
+                {customer ? customer.name.split(' ')[0] : 'Account'}
               </Link>
             </div>
           </div>

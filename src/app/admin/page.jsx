@@ -5,17 +5,19 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Plus, Edit2, Trash2, LogOut, Package, X, Check,
-  Upload, Tag, DollarSign, AlignLeft, Star
+  Upload, Tag, DollarSign, Star
 } from 'lucide-react';
 
 const EMPTY_FORM = {
   name: '', price: '', category: 'Kid', description: '',
-  image: '', featured: false, stock: 100,
+  image: '', images: ['', '', '', ''], featured: false, stock: 100,
 };
 
 export default function AdminDashboard() {
   const router = useRouter();
   const fileRef = useRef(null);
+  const uploadSlotRef = useRef(null);
+  const [uploadSlot, setUploadSlot] = useState(null); // 'main' | 0-3 — for loading indicator only
 
   const [auth, setAuth] = useState(null); // null=loading, false=not authed, true=authed
   const [products, setProducts] = useState([]);
@@ -80,6 +82,7 @@ export default function AdminDashboard() {
     setForm({
       name: p.name, price: String(p.price), category: p.category,
       description: p.description, image: p.image,
+      images: p.images?.length ? [...p.images, ...Array(4).fill('')].slice(0, 4) : ['', '', '', ''],
       featured: p.featured, stock: p.stock,
     });
     setEditTarget(p._id);
@@ -87,15 +90,32 @@ export default function AdminDashboard() {
     setModal('edit');
   };
 
-  const handleUpload = async (file) => {
+  const triggerUpload = (slot) => {
+    uploadSlotRef.current = slot; // sync ref — no stale closure
+    setUploadSlot(slot);          // state — only for loading indicator
+    fileRef.current?.click();
+  };
+
+  const handleUpload = async (file, slot) => {
     setUploadLoading(true);
     const fd = new FormData();
     fd.append('image', file);
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.success) setForm((f) => ({ ...f, image: data.url }));
-      else showToast(data.error || 'Upload failed', 'error');
+      if (data.success) {
+        if (slot === 'main') {
+          setForm((f) => ({ ...f, image: data.url }));
+        } else {
+          setForm((f) => {
+            const imgs = [...(f.images || ['', '', '', ''])];
+            imgs[slot] = data.url;
+            return { ...f, images: imgs };
+          });
+        }
+      } else {
+        showToast(data.error || 'Upload failed', 'error');
+      }
     } catch {
       showToast('Upload failed', 'error');
     } finally {
@@ -111,7 +131,12 @@ export default function AdminDashboard() {
     if (!form.price || isNaN(form.price)) { setFormError('Valid price is required.'); return; }
 
     setFormLoading(true);
-    const payload = { ...form, price: Number(form.price), stock: Number(form.stock) };
+    const payload = {
+      ...form,
+      price: Number(form.price),
+      stock: Number(form.stock),
+      images: (form.images || []).filter(Boolean),
+    };
     const url = editTarget ? `/api/products/${editTarget}` : '/api/products';
     const method = editTarget ? 'PUT' : 'POST';
 
@@ -515,51 +540,100 @@ export default function AdminDashboard() {
               {/* Image upload */}
               <div>
                 <label className="text-[10px] tracking-widest uppercase text-zinc-400 block mb-2">
-                  Product Image *
+                  Product Images * (1 main + up to 4 gallery)
                 </label>
+
+                {/* Hidden file input shared across all slots */}
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files[0]) {
+                      handleUpload(e.target.files[0], uploadSlotRef.current);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+
+                {/* Main image */}
                 <div
                   className="border-2 border-dashed border-zinc-200 p-4 text-center cursor-pointer hover:border-black transition-colors"
-                  onClick={() => fileRef.current?.click()}
+                  onClick={() => triggerUpload('main')}
                 >
                   {form.image ? (
                     <div className="relative h-40">
-                      <Image
-                        src={form.image}
-                        alt="Preview"
-                        fill
-                        className="object-contain"
-                        sizes="400px"
-                      />
+                      <Image src={form.image} alt="Main" fill className="object-contain" sizes="400px" />
                     </div>
                   ) : (
-                    <div className="py-8">
-                      <Upload size={24} className="text-zinc-300 mx-auto mb-2" />
-                      <p className="text-xs text-zinc-400">Click to upload image</p>
+                    <div className="py-6">
+                      <Upload size={22} className="text-zinc-300 mx-auto mb-2" />
+                      <p className="text-xs text-zinc-400">Main image (cover)</p>
                       <p className="text-[11px] text-zinc-300 mt-1">JPG, PNG, WebP — max 5 MB</p>
                     </div>
                   )}
-                  {uploadLoading && (
+                  {uploadLoading && uploadSlot === 'main' && (
                     <div className="mt-2 flex items-center justify-center gap-2 text-xs text-zinc-400">
                       <span className="w-3 h-3 border border-zinc-300 border-t-black rounded-full animate-spin" />
                       Uploading…
                     </div>
                   )}
                 </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files[0] && handleUpload(e.target.files[0])}
-                />
-                {/* Or paste URL */}
-                <input
-                  type="url"
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
-                  placeholder="Or paste image URL…"
-                  className="mt-2 w-full border border-zinc-200 px-3 py-2 text-xs focus:outline-none focus:border-black"
-                />
+                <div className="flex gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={form.image}
+                    onChange={(e) => setForm({ ...form, image: e.target.value })}
+                    placeholder="Or paste main image URL…"
+                    className="flex-1 border border-zinc-200 px-3 py-2 text-xs focus:outline-none focus:border-black"
+                  />
+                  {form.image && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, image: '' }))}
+                      className="px-3 py-2 text-[10px] tracking-widest uppercase text-zinc-400 hover:text-red-500 border border-zinc-200 hover:border-red-300 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {/* Gallery images (4 slots) */}
+                <p className="text-[10px] tracking-widest uppercase text-zinc-400 mt-4 mb-2">Gallery Images</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3].map((idx) => (
+                    <div key={idx}>
+                      <div
+                        className="border border-dashed border-zinc-200 cursor-pointer hover:border-black transition-colors aspect-square flex items-center justify-center overflow-hidden"
+                        onClick={() => triggerUpload(idx)}
+                      >
+                        {form.images?.[idx] ? (
+                          <div className="relative w-full h-full">
+                            <Image src={form.images[idx]} alt={`Gallery ${idx + 1}`} fill className="object-cover" sizes="100px" />
+                          </div>
+                        ) : uploadLoading && uploadSlot === idx ? (
+                          <span className="w-4 h-4 border border-zinc-300 border-t-black rounded-full animate-spin" />
+                        ) : (
+                          <Upload size={16} className="text-zinc-300" />
+                        )}
+                      </div>
+                      {form.images?.[idx] && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const imgs = [...(form.images || ['', '', '', ''])];
+                            imgs[idx] = '';
+                            setForm((f) => ({ ...f, images: imgs }));
+                          }}
+                          className="w-full text-[9px] text-zinc-400 hover:text-red-500 mt-0.5 text-center"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Name */}
