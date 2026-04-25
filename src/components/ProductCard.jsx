@@ -18,10 +18,12 @@ export default function ProductCard({ product }) {
 
   const wishlisted = isWishlisted(product._id);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const isOutOfStock = product.stock === 0;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) return;
     setLoading(true);
     await new Promise((r) => setTimeout(r, 400));
     addItem(product);
@@ -104,12 +106,18 @@ export default function ProductCard({ product }) {
       {/* Add to cart — outside Link so it never triggers navigation */}
       <button
         onClick={handleAddToCart}
-        disabled={loading || added}
-        className={`mt-3 w-full flex items-center justify-center gap-2 text-xs tracking-widest uppercase py-3 active:scale-[0.98] transition-all duration-200 disabled:cursor-default ${
-          added ? 'bg-zinc-800 text-white' : 'bg-black text-white hover:bg-zinc-800'
+        disabled={loading || added || isOutOfStock}
+        className={`mt-3 w-full flex items-center justify-center gap-2 text-xs tracking-widest uppercase py-3 active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed ${
+          isOutOfStock
+            ? 'bg-zinc-200 text-zinc-500'
+            : added
+            ? 'bg-zinc-800 text-white'
+            : 'bg-black text-white hover:bg-zinc-800'
         }`}
       >
-        {loading ? (
+        {isOutOfStock ? (
+          'Out of Stock'
+        ) : loading ? (
           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         ) : added ? (
           <>

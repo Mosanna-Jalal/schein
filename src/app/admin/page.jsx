@@ -36,6 +36,8 @@ export default function AdminDashboard() {
   const [franchiseInquiries, setFranchiseInquiries] = useState([]);
   const [franchiseLoading, setFranchiseLoading] = useState(false);
   const [franchiseLoaded, setFranchiseLoaded] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -55,8 +57,24 @@ export default function AdminDashboard() {
 
   // Fetch products when authed
   useEffect(() => {
-    if (auth) fetchProducts();
+    if (auth) {
+      fetchProducts();
+      fetchOrders();
+    }
   }, [auth]);
+
+  const fetchOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      setOrders(data.orders || []);
+    } catch {
+      // silent
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -346,6 +364,67 @@ export default function AdminDashboard() {
                             )}
                           </button>
                         </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Orders */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="bg-white border border-zinc-100 mt-8">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold tracking-widest uppercase text-zinc-700">Recent Orders</h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {ordersLoading ? 'Loading…' : `${orders.length} order${orders.length !== 1 ? 's' : ''}`}
+              </p>
+            </div>
+            <button
+              onClick={fetchOrders}
+              className="text-[10px] tracking-widest uppercase text-zinc-400 hover:text-black transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+          {ordersLoading ? (
+            <div className="py-16 flex justify-center">
+              <span className="w-6 h-6 border-2 border-zinc-200 border-t-black rounded-full animate-spin" />
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="py-16 text-center">
+              <Package size={36} className="text-zinc-200 mx-auto mb-3" />
+              <p className="text-sm text-zinc-400">No orders yet.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-left">
+                    {['Date', 'Payment ID', 'Items', 'Amount', 'Status'].map((h) => (
+                      <th key={h} className="px-6 py-3 text-[10px] tracking-widest uppercase text-zinc-400 font-medium">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50">
+                  {orders.map((o) => (
+                    <tr key={o._id} className="hover:bg-zinc-50">
+                      <td className="px-6 py-4 text-zinc-500 whitespace-nowrap">
+                        {new Date(o.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-[11px] text-zinc-600">{o.razorpayPaymentId}</td>
+                      <td className="px-6 py-4 text-zinc-700 max-w-[280px]">
+                        {(o.items || []).map((it) => `${it.name}${it.size ? ` (${it.size})` : ''} x${it.quantity}`).join(', ')}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-black whitespace-nowrap">Rs. {o.amount?.toLocaleString()}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-block text-[9px] tracking-widest uppercase px-2 py-1 bg-green-50 text-green-700">
+                          {o.status || 'paid'}
+                        </span>
                       </td>
                     </tr>
                   ))}
