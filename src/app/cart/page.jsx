@@ -11,6 +11,7 @@ import { useCustomer } from '@/context/CustomerContext';
 // Dummy coupon codes
 const COUPONS = {
   SCHEIN10: 0.10,
+  SCHEIN12: 0.12,
   SCHEIN20: 0.20,
   WELCOME: 0.15,
 };

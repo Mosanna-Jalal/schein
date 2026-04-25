@@ -5,8 +5,8 @@ import { X, ArrowRight, Copy, Check } from 'lucide-react';
 
 const POPUP_KEY    = 'schein_offer_seen';
 const HIDE_HOURS   = 24;
-const OFFER_CODE   = 'SCHEIN10';
-const OFFER_PCT    = '10%';
+const OFFER_CODE   = 'SCHEIN12';
+const OFFER_PCT    = '12%';
 
 export default function OfferPopup() {
   const [visible, setVisible]   = useState(false);
@@ -56,29 +56,29 @@ export default function OfferPopup() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-400 ${
+      className={`fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-4 overflow-y-auto transition-all duration-400 ${
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm"
         onClick={() => dismiss(false)}
       />
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-3xl bg-white overflow-hidden shadow-2xl transition-all duration-500 ${
+        className={`relative w-full max-w-3xl bg-white shadow-2xl my-auto transition-all duration-500 ${
           visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
         }`}
       >
-        {/* Close */}
+        {/* Close — always visible, fixed to modal top-right */}
         <button
           onClick={() => dismiss(true)}
-          className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-black/10 text-white hover:text-black transition-all duration-200 rounded-sm"
+          className="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center bg-white text-black shadow-lg hover:bg-zinc-100 active:scale-95 transition-all duration-200 rounded-full"
           aria-label="Close"
         >
-          <X size={16} />
+          <X size={18} strokeWidth={2.5} />
         </button>
 
         <div className="grid grid-cols-1 sm:grid-cols-[45%_55%]">
