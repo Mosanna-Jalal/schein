@@ -121,7 +121,14 @@ export default function CartPage() {
         theme: { color: '#000000' },
       };
 
-      new window.Razorpay(options).open();
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        const reason = response?.error?.description || 'Payment failed';
+        addToast(`${reason}. Money debited (if any) will be refunded by your bank in 5-7 days.`, 'error');
+        rzp.close();
+        setRazorpayLoading(false);
+      });
+      rzp.open();
     } catch (err) {
       addToast(err.message || 'Payment failed. Try WhatsApp order.', 'error');
     }
