@@ -50,17 +50,17 @@ function toScheinProduct(item) {
 }
 
 async function fetchDummyCategory(category) {
-  const res = await fetch(
-    `${DUMMY_BASE_URL}/products/category/${encodeURIComponent(category)}?limit=100`,
-    { cache: 'no-store' }
-  );
-
-  if (!res.ok) {
-    throw new Error(`DummyJSON category fetch failed: ${category}`);
+  try {
+    const res = await fetch(
+      `${DUMMY_BASE_URL}/products/category/${encodeURIComponent(category)}?limit=100`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.products || [];
+  } catch {
+    return [];
   }
-
-  const data = await res.json();
-  return data.products || [];
 }
 
 export async function fetchDummyProducts({
@@ -108,7 +108,7 @@ export async function fetchDummyProductById(id) {
   const numericId = Number(rawId);
   if (!Number.isFinite(numericId)) return null;
 
-  const res = await fetch(`${DUMMY_BASE_URL}/products/${numericId}`, { cache: 'no-store' });
+  const res = await fetch(`${DUMMY_BASE_URL}/products/${numericId}`, { next: { revalidate: 3600 } });
   if (!res.ok) return null;
 
   const item = await res.json();
