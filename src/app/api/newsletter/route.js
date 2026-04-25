@@ -2,7 +2,7 @@ import { connectDB } from '@/lib/mongodb';
 import Subscriber from '@/models/Subscriber';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request) {
   try {
@@ -21,13 +21,15 @@ export async function POST(request) {
 
     await Subscriber.create({ email });
 
-    // Send welcome email
-    await resend.emails.send({
-      from: 'Schein <onboarding@resend.dev>',
-      to: email,
-      subject: 'Welcome to Schein — You\'re on the list.',
-      html: welcomeEmail(email),
-    });
+    // Send welcome email (skipped if Resend not configured)
+    if (resend) {
+      await resend.emails.send({
+        from: 'Schein <onboarding@resend.dev>',
+        to: email,
+        subject: 'Welcome to Schein — You\'re on the list.',
+        html: welcomeEmail(email),
+      });
+    }
 
     return Response.json({ success: true, message: 'Subscribed successfully' });
   } catch (error) {

@@ -3,13 +3,17 @@ import Subscriber from '@/models/Subscriber';
 import { getAdminFromRequest } from '@/lib/auth';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request) {
   try {
     const admin = await getAdminFromRequest(request);
     if (!admin) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!resend) {
+      return Response.json({ success: false, error: 'Email service not configured' }, { status: 503 });
     }
 
     const { subject, message } = await request.json();
