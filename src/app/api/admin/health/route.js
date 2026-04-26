@@ -21,14 +21,22 @@ async function checkMongo() {
 }
 
 async function checkResend() {
-  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY not set');
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY not set');
+  if (!key.startsWith('re_')) throw new Error('RESEND_API_KEY format invalid');
+
+  // Try /domains (works for full-access keys). If 401, the key is sending-only
+  // — still valid for newsletter sends, mark as limited.
   const res = await fetch('https://api.resend.com/domains', {
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+    headers: { Authorization: `Bearer ${key}` },
   });
+  if (res.status === 401) {
+    return { keyType: 'sending-only', note: 'Newsletter sending works' };
+  }
   if (!res.ok) throw new Error(`Resend API ${res.status}`);
   const data = await res.json();
   const domains = (data.data || []).map((d) => `${d.name} (${d.status})`);
-  return { domains };
+  return { keyType: 'full-access', domains };
 }
 
 async function checkRazorpay() {
@@ -56,12 +64,41 @@ async function checkSite() {
   return { url, status: res.status };
 }
 
+const CHECK_FNS = {
+  mongo: checkMongo,
+  resend: checkResend,
+  razorpay: checkRazorpay,
+  site: checkSite,
+};
+
 export async function GET(request) {
   const admin = await getAdminFromRequest(request);
   if (!admin) {
     return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const only = searchParams.get('only');
+
+  const deploy = {
+    commit: process.env.VERCEL_GIT_COMMIT_SHA || 'local',
+    url: process.env.VERCEL_URL || 'localhost',
+    region: process.env.VERCEL_REGION || 'unknown',
+  };
+
+  // Single-check mode for the streaming UI
+  if (only && CHECK_FNS[only]) {
+    const result = await timed(CHECK_FNS[only]);
+    return Response.json({
+      success: true,
+      check: only,
+      result,
+      deploy,
+      checkedAt: new Date().toISOString(),
+    });
+  }
+
+  // Bulk mode (legacy / fallback)
   const [mongo, resend, razorpay, site] = await Promise.all([
     timed(checkMongo),
     timed(checkResend),
@@ -76,11 +113,7 @@ export async function GET(request) {
     success: true,
     overall: allOk ? 'healthy' : 'degraded',
     checkedAt: new Date().toISOString(),
-    deploy: {
-      commit: process.env.VERCEL_GIT_COMMIT_SHA || 'local',
-      url: process.env.VERCEL_URL || 'localhost',
-      region: process.env.VERCEL_REGION || 'unknown',
-    },
+    deploy,
     checks,
   });
 }

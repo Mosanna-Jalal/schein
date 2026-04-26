@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [health, setHealth] = useState(null);
   const [healthLoading, setHealthLoading] = useState(false);
+  const [healthLog, setHealthLog] = useState([]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -67,15 +68,68 @@ export default function AdminDashboard() {
 
   const runHealthCheck = async () => {
     setHealthLoading(true);
-    try {
-      const res = await fetch('/api/admin/health');
-      const data = await res.json();
-      setHealth(data);
-    } catch (err) {
-      setHealth({ success: false, error: err.message });
-    } finally {
-      setHealthLoading(false);
+    setHealth(null);
+    const log = [];
+    const pushLog = (line) => {
+      log.push(line);
+      setHealthLog([...log]);
+    };
+
+    const ts = () => new Date().toLocaleTimeString('en-IN', { hour12: false });
+    pushLog(`[${ts()}] $ schein-doctor --verbose`);
+    pushLog(`[${ts()}] initializing diagnostic suite...`);
+    await new Promise((r) => setTimeout(r, 200));
+    pushLog(`[${ts()}] target: production (schein.in)`);
+    pushLog(`[${ts()}] ─────────────────────────────────`);
+
+    const checks = [
+      { key: 'mongo',    label: 'MongoDB Atlas',     emoji: '🗄️' },
+      { key: 'resend',   label: 'Resend (email)',    emoji: '✉️' },
+      { key: 'razorpay', label: 'Razorpay (payments)', emoji: '💳' },
+      { key: 'site',     label: 'schein.in (HTTP)',  emoji: '🌐' },
+    ];
+
+    const results = {};
+    let deploy = null;
+
+    for (const c of checks) {
+      pushLog(`[${ts()}] ▸ probing ${c.label}...`);
+      try {
+        const res = await fetch(`/api/admin/health?only=${c.key}`);
+        const data = await res.json();
+        results[c.key] = data.result;
+        deploy = data.deploy;
+        const r = data.result;
+        if (r.ok) {
+          pushLog(`[${ts()}]   ✓ OK (${r.latencyMs}ms)`);
+          if (r.info) {
+            Object.entries(r.info).forEach(([k, v]) => {
+              const val = Array.isArray(v) ? (v.join(', ') || '—') : v;
+              pushLog(`[${ts()}]     · ${k}: ${val}`);
+            });
+          }
+        } else {
+          pushLog(`[${ts()}]   ✗ FAIL (${r.latencyMs}ms): ${r.error}`);
+        }
+      } catch (err) {
+        results[c.key] = { ok: false, latencyMs: 0, error: err.message };
+        pushLog(`[${ts()}]   ✗ FAIL: ${err.message}`);
+      }
     }
+
+    pushLog(`[${ts()}] ─────────────────────────────────`);
+    const allOk = Object.values(results).every((r) => r.ok);
+    pushLog(`[${ts()}] result: ${allOk ? 'HEALTHY ✓' : 'DEGRADED ✗'}`);
+    pushLog(`[${ts()}] $ _`);
+
+    setHealth({
+      success: true,
+      overall: allOk ? 'healthy' : 'degraded',
+      checkedAt: new Date().toISOString(),
+      deploy,
+      checks: results,
+    });
+    setHealthLoading(false);
   };
 
   const fetchOrders = async () => {
@@ -470,7 +524,24 @@ export default function AdminDashboard() {
               {healthLoading ? 'Running…' : health ? 'Run Again' : 'Run Check'}
             </button>
           </div>
-          {health && (
+          {(healthLoading || healthLog.length > 0) && (
+            <div className="px-6 pt-6">
+              <div className="bg-zinc-950 text-green-400 font-mono text-[11px] leading-relaxed p-4 max-h-72 overflow-y-auto rounded-sm">
+                {healthLog.map((line, i) => {
+                  let cls = 'text-zinc-400';
+                  if (line.includes('✓')) cls = 'text-green-400';
+                  else if (line.includes('✗')) cls = 'text-red-400';
+                  else if (line.includes('▸')) cls = 'text-amber-400';
+                  else if (line.includes('$')) cls = 'text-cyan-400';
+                  return <div key={i} className={cls}>{line}</div>;
+                })}
+                {healthLoading && (
+                  <span className="inline-block w-2 h-3 bg-green-400 animate-pulse ml-1" />
+                )}
+              </div>
+            </div>
+          )}
+          {health && !healthLoading && (
             <div className="p-6">
               {/* Overall status */}
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-100">
