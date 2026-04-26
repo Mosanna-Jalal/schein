@@ -138,7 +138,7 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <div ref={accountRef} className="relative hidden sm:block">
+              <div ref={accountRef} className="relative">
                 <button
                   onClick={() => setAccountOpen((v) => !v)}
                   className="relative p-1 group"
