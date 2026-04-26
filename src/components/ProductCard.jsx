@@ -71,7 +71,7 @@ export default function ProductCard({ product }) {
           <button
             onClick={handleWishlist}
             disabled={wishlistLoading}
-            className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60"
+            className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60"
             aria-label="Toggle wishlist"
           >
             {wishlistLoading ? (
@@ -81,8 +81,8 @@ export default function ProductCard({ product }) {
             )}
           </button>
 
-          {/* Quick view */}
-          <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {/* Quick view — desktop only (mobile users tap the card directly) */}
+          <div className="hidden sm:block absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
             <span className="flex items-center gap-1 text-[10px] tracking-widest uppercase bg-white/90 backdrop-blur-sm px-2 py-1 text-zinc-700">
               <Eye size={11} />
               Quick View
