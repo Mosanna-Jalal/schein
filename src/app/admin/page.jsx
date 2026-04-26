@@ -38,6 +38,8 @@ export default function AdminDashboard() {
   const [franchiseLoaded, setFranchiseLoaded] = useState(false);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [health, setHealth] = useState(null);
+  const [healthLoading, setHealthLoading] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -62,6 +64,19 @@ export default function AdminDashboard() {
       fetchOrders();
     }
   }, [auth]);
+
+  const runHealthCheck = async () => {
+    setHealthLoading(true);
+    try {
+      const res = await fetch('/api/admin/health');
+      const data = await res.json();
+      setHealth(data);
+    } catch (err) {
+      setHealth({ success: false, error: err.message });
+    } finally {
+      setHealthLoading(false);
+    }
+  };
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
@@ -430,6 +445,72 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* System Health */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="bg-white border border-zinc-100 mt-8">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold tracking-widest uppercase text-zinc-700">System Health</h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {health
+                  ? `Last checked ${new Date(health.checkedAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}`
+                  : 'Verify all integrations are operational'}
+              </p>
+            </div>
+            <button
+              onClick={runHealthCheck}
+              disabled={healthLoading}
+              className="text-[10px] tracking-widest uppercase px-4 py-2 bg-black text-white hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+            >
+              {healthLoading ? 'Running…' : health ? 'Run Again' : 'Run Check'}
+            </button>
+          </div>
+          {health && (
+            <div className="p-6">
+              {/* Overall status */}
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-100">
+                <span className={`w-3 h-3 rounded-full ${health.overall === 'healthy' ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className={`text-sm font-semibold uppercase tracking-widest ${health.overall === 'healthy' ? 'text-green-700' : 'text-red-600'}`}>
+                  {health.overall || 'Error'}
+                </span>
+                {health.deploy && (
+                  <span className="ml-auto text-[10px] text-zinc-400 font-mono">
+                    {health.deploy.commit?.slice(0, 7) || 'local'} · {health.deploy.region}
+                  </span>
+                )}
+              </div>
+              {/* Individual checks */}
+              {health.checks ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Object.entries(health.checks).map(([name, check]) => (
+                    <div key={name} className={`border p-4 ${check.ok ? 'border-zinc-100 bg-zinc-50/50' : 'border-red-200 bg-red-50/40'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${check.ok ? 'bg-green-500' : 'bg-red-500'}`} />
+                          <span className="text-xs font-semibold uppercase tracking-widest text-zinc-700">{name}</span>
+                        </div>
+                        <span className="text-[10px] text-zinc-400">{check.latencyMs}ms</span>
+                      </div>
+                      {check.ok ? (
+                        check.info && (
+                          <pre className="text-[11px] text-zinc-500 whitespace-pre-wrap break-words font-mono">
+                            {Object.entries(check.info).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') || '—' : v}`).join('\n')}
+                          </pre>
+                        )
+                      ) : (
+                        <p className="text-[11px] text-red-600 font-mono break-words">{check.error}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-red-600">{health.error || 'Health check failed'}</p>
+              )}
             </div>
           )}
         </div>

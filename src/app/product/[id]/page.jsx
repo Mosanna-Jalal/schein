@@ -10,7 +10,7 @@ async function getProduct(id) {
   try {
     const res = await fetch(
       `${getBaseUrl()}/api/products/${id}`,
-      { cache: 'no-store' }
+      { next: { revalidate: 60 } }
     );
     if (!res.ok) return null;
     const data = await res.json();

@@ -9,7 +9,7 @@ async function getFeaturedProducts() {
   try {
     const res = await fetch(
       `${getBaseUrl()}/api/products?featured=true&merged=true`,
-      { cache: 'no-store' }
+      { next: { revalidate: 60 } }
     );
     if (!res.ok) return [];
     const data = await res.json();
