@@ -31,7 +31,7 @@ export async function POST(request) {
 
     // Send in batches of 50 (Resend batch limit)
     const emails = subscribers.map((s) => ({
-      from: 'Schein <onboarding@resend.dev>',
+      from: 'Schein <no-reply@schein.in>',
       to: s.email,
       subject,
       html: broadcastEmail(subject, message),

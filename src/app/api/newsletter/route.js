@@ -24,7 +24,7 @@ export async function POST(request) {
     // Send welcome email (skipped if Resend not configured)
     if (resend) {
       await resend.emails.send({
-        from: 'Schein <onboarding@resend.dev>',
+        from: 'Schein <no-reply@schein.in>',
         to: email,
         subject: 'Welcome to Schein — You\'re on the list.',
         html: welcomeEmail(email),
