@@ -52,9 +52,9 @@ export default async function HomePage() {
         {/* Subtle vertical line accent */}
         <div className="absolute top-0 w-px h-full bg-gradient-to-b from-transparent via-white/[0.06] to-transparent hidden sm:block" style={{ right: '22%' }} />
 
-        {/* Content — flex column that fills full height, content anchored to bottom */}
-        <div className="relative z-10 flex flex-col min-h-screen max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 w-full pt-20 pb-12 sm:pb-20">
-          <div className="flex-1" />
+        {/* Content — centered on mobile, anchored to bottom on desktop */}
+        <div className="relative z-10 flex flex-col min-h-screen max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 w-full pt-20 pb-12 sm:pb-20 justify-center sm:justify-end">
+          <div className="hidden sm:block sm:flex-1" />
 
           <div className="max-w-xl">
             {/* Label — fade up */}

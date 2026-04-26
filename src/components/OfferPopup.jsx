@@ -5,8 +5,10 @@ import { X, ArrowRight, Copy, Check } from 'lucide-react';
 
 const POPUP_KEY    = 'schein_offer_seen';
 const HIDE_HOURS   = 24;
-const OFFER_CODE   = 'SCHEIN12';
-const OFFER_PCT    = '12%';
+const PUBLIC_CODE  = 'SCHEIN10';
+const PUBLIC_PCT   = '10%';
+const SUB_CODE     = 'SCHEIN12';
+const SUB_PCT      = '12%';
 
 export default function OfferPopup() {
   const [visible, setVisible]   = useState(false);
@@ -32,7 +34,7 @@ export default function OfferPopup() {
   };
 
   const copyCode = () => {
-    navigator.clipboard.writeText(OFFER_CODE).catch(() => {});
+    navigator.clipboard.writeText(subbed ? SUB_CODE : PUBLIC_CODE).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -99,11 +101,13 @@ export default function OfferPopup() {
               <p className="text-white/50 text-xs tracking-widest uppercase mb-2">Get</p>
               <h2 className="font-black text-white leading-none mb-3"
                 style={{ fontSize: 'clamp(48px, 8vw, 80px)' }}>
-                {OFFER_PCT}<br />
+                {subbed ? SUB_PCT : PUBLIC_PCT}<br />
                 <span className="text-amber-400">Off</span>
               </h2>
               <p className="text-zinc-500 text-sm leading-relaxed">
-                On your first order. Use the code at checkout.
+                {subbed
+                  ? 'Subscriber bonus unlocked. Use the code at checkout.'
+                  : 'On your first order. Subscribe to unlock 12%.'}
               </p>
             </div>
 
@@ -114,7 +118,7 @@ export default function OfferPopup() {
             >
               <div className="text-left">
                 <p className="text-[9px] tracking-[0.3em] uppercase text-zinc-600 mb-0.5">Promo Code</p>
-                <p className="text-white font-bold tracking-[0.2em] text-sm">{OFFER_CODE}</p>
+                <p className="text-white font-bold tracking-[0.2em] text-sm">{subbed ? SUB_CODE : PUBLIC_CODE}</p>
               </div>
               <div className={`shrink-0 transition-colors ${copied ? 'text-green-400' : 'text-zinc-600 group-hover:text-white'}`}>
                 {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -132,13 +136,13 @@ export default function OfferPopup() {
               New drops.<br />Premium pieces.
             </h3>
             <p className="text-zinc-500 text-sm leading-relaxed mb-8">
-              Subscribe to be the first to know about new collections, restocks, and exclusive member offers — plus unlock your discount code right now.
+              Subscribe to unlock an extra 2% (total 12%) — plus first access to new drops, restocks, and member-only offers.
             </p>
 
             {subbed ? (
               <div className="flex items-center gap-2 text-green-600 mb-6">
                 <Check size={16} />
-                <span className="text-sm font-medium">You're subscribed! Use <strong>{OFFER_CODE}</strong> at checkout.</span>
+                <span className="text-sm font-medium">Subscribed! Use <strong>{SUB_CODE}</strong> at checkout for 12% off.</span>
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex flex-col gap-3 mb-6">
@@ -157,7 +161,7 @@ export default function OfferPopup() {
                 >
                   {subLoading
                     ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : <> Unlock My {OFFER_PCT} Off <ArrowRight size={13} /> </>
+                    : <> Unlock My {SUB_PCT} Off <ArrowRight size={13} /> </>
                   }
                 </button>
               </form>
