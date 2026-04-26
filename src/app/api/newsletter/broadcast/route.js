@@ -1,5 +1,6 @@
 import { connectDB } from '@/lib/mongodb';
 import Subscriber from '@/models/Subscriber';
+import Broadcast from '@/models/Broadcast';
 import { getAdminFromRequest } from '@/lib/auth';
 import { Resend } from 'resend';
 
@@ -39,13 +40,45 @@ export async function POST(request) {
 
     const batchSize = 50;
     let sent = 0;
-    for (let i = 0; i < emails.length; i += batchSize) {
-      const batch = emails.slice(i, i + batchSize);
-      await resend.batch.send(batch);
-      sent += batch.length;
+    let sendError = null;
+    try {
+      for (let i = 0; i < emails.length; i += batchSize) {
+        const batch = emails.slice(i, i + batchSize);
+        await resend.batch.send(batch);
+        sent += batch.length;
+      }
+    } catch (err) {
+      sendError = err.message;
     }
 
-    return Response.json({ success: true, sent, total: subscribers.length });
+    const status = sendError ? (sent > 0 ? 'partial' : 'failed') : 'sent';
+    await Broadcast.create({
+      subject,
+      message,
+      sentCount: sent,
+      totalSubscribers: subscribers.length,
+      status,
+      error: sendError,
+    });
+
+    if (sendError && sent === 0) {
+      return Response.json({ success: false, error: sendError }, { status: 500 });
+    }
+    return Response.json({ success: true, sent, total: subscribers.length, status });
+  } catch (error) {
+    return Response.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function GET(request) {
+  try {
+    const admin = await getAdminFromRequest(request);
+    if (!admin) {
+      return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    await connectDB();
+    const broadcasts = await Broadcast.find({}).sort({ createdAt: -1 }).limit(50).lean();
+    return Response.json({ success: true, broadcasts });
   } catch (error) {
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }

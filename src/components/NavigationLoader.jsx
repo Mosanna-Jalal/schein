@@ -28,6 +28,10 @@ function LoaderCore() {
 
   useEffect(() => {
     const handleClick = (e) => {
+      // Skip if click is on a button (e.g. wishlist heart inside a product card Link)
+      // — those handle their own logic and do not navigate.
+      if (e.target.closest('button')) return;
+
       const anchor = e.target.closest('a[href]');
       if (!anchor) return;
 

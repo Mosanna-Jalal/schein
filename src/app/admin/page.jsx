@@ -41,6 +41,8 @@ export default function AdminDashboard() {
   const [health, setHealth] = useState(null);
   const [healthLoading, setHealthLoading] = useState(false);
   const [healthLog, setHealthLog] = useState([]);
+  const [broadcasts, setBroadcasts] = useState([]);
+  const [broadcastsLoading, setBroadcastsLoading] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -63,8 +65,22 @@ export default function AdminDashboard() {
     if (auth) {
       fetchProducts();
       fetchOrders();
+      fetchBroadcasts();
     }
   }, [auth]);
+
+  const fetchBroadcasts = async () => {
+    setBroadcastsLoading(true);
+    try {
+      const res = await fetch('/api/newsletter/broadcast');
+      const data = await res.json();
+      setBroadcasts(data.broadcasts || []);
+    } catch {
+      // silent
+    } finally {
+      setBroadcastsLoading(false);
+    }
+  };
 
   const runHealthCheck = async () => {
     setHealthLoading(true);
@@ -183,10 +199,55 @@ export default function AdminDashboard() {
     fileRef.current?.click();
   };
 
+  const resizeImage = (file, maxDim = 1200, quality = 0.85) =>
+    new Promise((resolve, reject) => {
+      const img = new window.Image();
+      const reader = new FileReader();
+      reader.onload = () => { img.src = reader.result; };
+      reader.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width <= maxDim && height <= maxDim) {
+          // Already small enough — just re-encode as JPEG to strip metadata + compress
+        } else if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('Resize failed'));
+            const resized = new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(resized);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Invalid image'));
+      reader.readAsDataURL(file);
+    });
+
   const handleUpload = async (file, slot) => {
     setUploadLoading(true);
+    let toUpload = file;
+    try {
+      toUpload = await resizeImage(file);
+    } catch {
+      // If resize fails (e.g. weird format), fall back to original
+    }
     const fd = new FormData();
-    fd.append('image', file);
+    fd.append('image', toUpload);
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
@@ -649,6 +710,7 @@ export default function AdminDashboard() {
                     if (data.success) {
                       showToast(`Sent to ${data.sent} subscriber${data.sent !== 1 ? 's' : ''}`);
                       setNewsletter({ subject: '', message: '' });
+                      fetchBroadcasts();
                     } else {
                       showToast(data.error || 'Failed to send', 'error');
                     }
@@ -668,6 +730,67 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Newsletter History */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="bg-white border border-zinc-100 mt-8">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold tracking-widest uppercase text-zinc-700">Newsletter History</h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {broadcastsLoading ? 'Loading…' : `${broadcasts.length} broadcast${broadcasts.length !== 1 ? 's' : ''} sent`}
+              </p>
+            </div>
+            <button
+              onClick={fetchBroadcasts}
+              className="text-[10px] tracking-widest uppercase text-zinc-400 hover:text-black transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+          {broadcasts.length === 0 && !broadcastsLoading ? (
+            <div className="py-10 text-center text-zinc-400 text-sm">No broadcasts sent yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-left">
+                    {['Sent', 'Subject', 'Recipients', 'Status'].map((h) => (
+                      <th key={h} className="px-6 py-3 text-[10px] tracking-widest uppercase text-zinc-400 font-medium">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50">
+                  {broadcasts.map((b) => (
+                    <tr key={b._id} className="hover:bg-zinc-50 align-top">
+                      <td className="px-6 py-4 text-zinc-500 whitespace-nowrap">
+                        {new Date(b.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-6 py-4 text-zinc-700 max-w-[320px]">
+                        <div className="font-medium text-black truncate">{b.subject}</div>
+                        <div className="text-xs text-zinc-400 line-clamp-2 mt-0.5">{b.message}</div>
+                      </td>
+                      <td className="px-6 py-4 text-zinc-600 whitespace-nowrap">
+                        {b.sentCount} / {b.totalSubscribers}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-block text-[9px] tracking-widest uppercase px-2 py-1 ${
+                          b.status === 'sent' ? 'bg-green-50 text-green-700'
+                          : b.status === 'partial' ? 'bg-amber-50 text-amber-700'
+                          : 'bg-red-50 text-red-700'
+                        }`}>
+                          {b.status}
+                        </span>
+                        {b.error && <p className="text-[10px] text-red-500 mt-1 max-w-[200px] truncate">{b.error}</p>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
