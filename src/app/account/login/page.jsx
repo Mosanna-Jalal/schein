@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useCustomer } from '@/context/CustomerContext';
 
 export default function AccountLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setCustomer } = useCustomer();
-  const [tab, setTab] = useState('login');
+  const initialTab = searchParams.get('tab') === 'signup' ? 'register' : 'login';
+  const [tab, setTab] = useState(initialTab);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);

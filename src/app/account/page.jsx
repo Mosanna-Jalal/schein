@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package, User, LogOut, ShoppingBag, ChevronRight, ArrowRight } from 'lucide-react';
@@ -9,8 +9,10 @@ import { useCustomer } from '@/context/CustomerContext';
 
 export default function AccountPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { customer, loading, logout } = useCustomer();
-  const [tab, setTab] = useState('overview');
+  const initialTab = searchParams.get('tab') === 'orders' ? 'orders' : 'overview';
+  const [tab, setTab] = useState(initialTab);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 

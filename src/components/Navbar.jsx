@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ShoppingBag, Heart, Menu, X, User, ArrowRight } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { ShoppingBag, Heart, Menu, X, User, ArrowRight, LogOut, Package, UserPlus, LogIn } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCustomer } from '@/context/CustomerContext';
@@ -11,11 +11,38 @@ import { useCustomer } from '@/context/CustomerContext';
 export default function Navbar() {
   const { count } = useCart();
   const { wishlist } = useWishlist();
-  const { customer } = useCustomer();
+  const { customer, logout } = useCustomer();
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === '/';
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef(null);
+
+  // Close account dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!accountOpen) return;
+    const onDocClick = (e) => {
+      if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false);
+    };
+    const onEsc = (e) => { if (e.key === 'Escape') setAccountOpen(false); };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [accountOpen]);
+
+  // Close dropdown on route change
+  useEffect(() => { setAccountOpen(false); }, [pathname]);
+
+  const handleLogout = async () => {
+    await logout();
+    setAccountOpen(false);
+    router.push('/');
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -111,17 +138,91 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <Link href="/account" className="relative p-1 group hidden sm:block">
-                <User
-                  size={18}
-                  className={`transition-colors duration-300 ${
-                    isTransparent ? 'text-white/70 hover:text-white' : 'text-zinc-700 hover:text-black'
-                  }`}
-                />
-                {customer && (
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white" />
+              <div ref={accountRef} className="relative hidden sm:block">
+                <button
+                  onClick={() => setAccountOpen((v) => !v)}
+                  className="relative p-1 group"
+                  aria-label="Account menu"
+                  aria-expanded={accountOpen}
+                >
+                  <User
+                    size={18}
+                    className={`transition-colors duration-300 ${
+                      isTransparent ? 'text-white/70 hover:text-white' : 'text-zinc-700 hover:text-black'
+                    }`}
+                  />
+                  {customer && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white" />
+                  )}
+                </button>
+
+                {accountOpen && (
+                  <div className="absolute right-0 mt-3 w-60 bg-white border border-zinc-100 shadow-2xl py-2 origin-top-right animate-fade-in">
+                    {customer ? (
+                      <>
+                        <div className="px-4 py-3 border-b border-zinc-100">
+                          <p className="text-[10px] tracking-[0.2em] uppercase text-zinc-400 mb-0.5">Signed in as</p>
+                          <p className="text-sm font-semibold text-black truncate">{customer.name}</p>
+                          <p className="text-[11px] text-zinc-500 truncate">{customer.email}</p>
+                        </div>
+                        <Link
+                          href="/account"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-black transition-colors"
+                        >
+                          <User size={14} className="text-zinc-400" /> My Account
+                        </Link>
+                        <Link
+                          href="/account?tab=orders"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-black transition-colors"
+                        >
+                          <Package size={14} className="text-zinc-400" /> My Orders
+                        </Link>
+                        <Link
+                          href="/shop?wishlist=true"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-black transition-colors"
+                        >
+                          <Heart size={14} className="text-zinc-400" /> Wishlist
+                          {wishlist.length > 0 && (
+                            <span className="ml-auto text-[10px] text-zinc-400">{wishlist.length}</span>
+                          )}
+                        </Link>
+                        <div className="border-t border-zinc-100 mt-1">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                          >
+                            <LogOut size={14} /> Sign Out
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="px-4 py-3 border-b border-zinc-100">
+                          <p className="text-sm font-semibold text-black mb-0.5">Welcome</p>
+                          <p className="text-[11px] text-zinc-500">Sign in or create an account</p>
+                        </div>
+                        <Link
+                          href="/account/login"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-black transition-colors"
+                        >
+                          <LogIn size={14} className="text-zinc-400" /> Sign In
+                        </Link>
+                        <Link
+                          href="/account/login?tab=signup"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-black transition-colors"
+                        >
+                          <UserPlus size={14} className="text-zinc-400" /> Create Account
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 )}
-              </Link>
+              </div>
 
               {/* Mobile hamburger */}
               <button
@@ -207,12 +308,12 @@ export default function Navbar() {
               </Link>
               <span className="text-zinc-700">·</span>
               <Link
-                href="/account"
+                href={customer ? '/account' : '/account/login'}
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-zinc-500 hover:text-white transition-colors"
               >
                 <User size={14} />
-                {customer ? customer.name.split(' ')[0] : 'Account'}
+                {customer ? customer.name.split(' ')[0] : 'Sign In'}
               </Link>
             </div>
           </div>
