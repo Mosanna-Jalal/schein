@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Package, User, LogOut, ShoppingBag, ChevronRight, ArrowRight } from 'lucide-react';
 import { useCustomer } from '@/context/CustomerContext';
 
-export default function AccountPage() {
+function AccountContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { customer, loading, logout } = useCustomer();
@@ -222,5 +222,13 @@ export default function AccountPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen pt-24" />}>
+      <AccountContent />
+    </Suspense>
   );
 }
