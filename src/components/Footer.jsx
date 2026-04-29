@@ -29,7 +29,7 @@ function FacebookIcon() {
 }
 
 const SOCIALS = [
-  { label: 'Instagram', href: '#', Icon: InstagramIcon, hoverColor: 'hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-amber-400 hover:border-transparent hover:text-white' },
+  { label: 'Instagram', href: 'https://www.instagram.com/schein_store', Icon: InstagramIcon, hoverColor: 'hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-amber-400 hover:border-transparent hover:text-white' },
   { label: 'X',         href: '#', Icon: XIcon,         hoverColor: 'hover:bg-white hover:border-white hover:text-black' },
   { label: 'Facebook',  href: '#', Icon: FacebookIcon,  hoverColor: 'hover:bg-blue-600 hover:border-blue-600 hover:text-white' },
 ];
@@ -52,6 +52,8 @@ export default function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target={href === '#' ? undefined : '_blank'}
+                  rel={href === '#' ? undefined : 'noopener noreferrer'}
                   aria-label={label}
                   className={`w-9 h-9 flex items-center justify-center border border-white/15 text-zinc-400 transition-all duration-300 ${hoverColor}`}
                 >

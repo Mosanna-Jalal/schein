@@ -287,13 +287,19 @@ export default function Navbar() {
           <div className="px-8 py-8 shrink-0 border-t border-white/10">
             <p className="text-[9px] tracking-[0.5em] uppercase text-zinc-600 mb-4">Connect</p>
             <div className="flex gap-8 mb-6">
-              {['Instagram', 'Twitter / X', 'Facebook'].map((s) => (
+              {[
+                { label: 'Instagram', href: 'https://www.instagram.com/schein_store' },
+                { label: 'Twitter / X', href: '#' },
+                { label: 'Facebook', href: '#' },
+              ].map((s) => (
                 <a
-                  key={s}
-                  href="#"
+                  key={s.label}
+                  href={s.href}
+                  target={s.href === '#' ? undefined : '_blank'}
+                  rel={s.href === '#' ? undefined : 'noopener noreferrer'}
                   className="text-sm text-zinc-500 hover:text-white transition-colors tracking-wide"
                 >
-                  {s}
+                  {s.label}
                 </a>
               ))}
             </div>
