@@ -3,6 +3,8 @@ import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import NewsletterSection from '@/components/NewsletterSection';
+import CategoryShowcase from '@/components/CategoryShowcase';
+import HeroCarousel from '@/components/HeroCarousel';
 import { getBaseUrl } from '@/lib/baseUrl';
 
 async function getFeaturedProducts() {
@@ -31,6 +33,8 @@ export default async function HomePage() {
     <main>
       {/* Hero — full viewport, transparent nav floats on top */}
       <section className="relative min-h-screen bg-black overflow-hidden">
+        {/* Background image carousel — lowest layer */}
+        <HeroCarousel />
         {/* Deep gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-900/60 to-black" />
         {/* Top veil — keeps transparent nav text readable at all times */}
@@ -111,18 +115,6 @@ export default async function HomePage() {
                 Shop Now
                 <ArrowRight size={14} />
               </Link>
-              <Link
-                href="/shop?category=Women"
-                className="inline-flex items-center gap-2 border border-white/20 text-white/70 px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
-              >
-                Women
-              </Link>
-              <Link
-                href="/shop?category=Kid"
-                className="inline-flex items-center gap-2 border border-white/20 text-white/70 px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:border-white/60 hover:text-white hover:bg-white/5 transition-all duration-200"
-              >
-                Kid
-              </Link>
             </div>
           </div>
         </div>
@@ -134,31 +126,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Category strips */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 border-y border-zinc-100">
-        {[
-          { label: 'Women', desc: 'Refined silhouettes', href: '/shop?category=Women' },
-          { label: 'Kid', desc: 'Young essentials', href: '/shop?category=Kid' },
-          { label: 'Unisex', desc: 'Beyond definition', href: '/shop?category=Unisex' },
-        ].map((cat, i) => (
-          <Link
-            key={cat.label}
-            href={cat.href}
-            className={`group flex flex-col justify-between px-10 py-12 hover:bg-zinc-50 transition-colors duration-300 ${
-              i < 2 ? 'sm:border-r border-zinc-100' : ''
-            } border-b sm:border-b-0 border-zinc-100`}
-          >
-            <div>
-              <p className="text-[9px] tracking-[0.4em] uppercase text-zinc-400 mb-3">{cat.desc}</p>
-              <h2 className="text-4xl font-black text-black tracking-tight">{cat.label}</h2>
-            </div>
-            <div className="flex items-center gap-2 mt-8 text-zinc-300 group-hover:text-black transition-colors duration-200">
-              <span className="text-[10px] tracking-[0.2em] uppercase">Explore</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-200" />
-            </div>
-          </Link>
-        ))}
-      </section>
+      <CategoryShowcase />
 
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 py-24">
@@ -176,13 +144,13 @@ export default async function HomePage() {
         </div>
 
         {featured.length === 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {featured.map((p) => (
               <ProductCard key={p._id} product={p} />
             ))}
@@ -273,7 +241,7 @@ export default async function HomePage() {
             href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '917301580009'}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 bg-white text-black px-9 py-4 text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-zinc-100 active:scale-95 transition-all duration-200"
+            className="inline-flex items-center gap-2.5 bg-white text-black px-6 py-3.5 sm:px-9 sm:py-4 text-[11px] tracking-[0.2em] uppercase font-semibold hover:bg-zinc-100 active:scale-95 transition-all duration-200"
           >
             Chat on WhatsApp
             <ArrowRight size={14} />

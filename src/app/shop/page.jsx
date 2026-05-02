@@ -7,7 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useWishlist } from '@/context/WishlistContext';
 
-const CATEGORIES = ['All', 'Women', 'Kid', 'Unisex', 'Accessories'];
+const CATEGORIES = ['All', 'Men', 'Women', 'Kid', 'Unisex', 'Accessories'];
 const SORT_OPTIONS = [
   { value: 'createdAt_desc', label: 'Newest First' },
   { value: 'price_asc', label: 'Price: Low to High' },

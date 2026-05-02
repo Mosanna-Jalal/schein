@@ -7,11 +7,39 @@ import { ShoppingBag, Heart, Menu, X, User, ArrowRight, LogOut, Package, UserPlu
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCustomer } from '@/context/CustomerContext';
+import { useToast } from '@/context/ToastContext';
+
+// Brand wordmark — orange acute accent over E, orange dot over I
+function ScheinLogo() {
+  const accent = 'bg-orange-400';
+  return (
+    <span className="text-xl font-black tracking-[0.3em] uppercase inline-flex items-center" aria-label="Schein">
+      <span>SCH</span>
+      <span className="relative inline-block">
+        E
+        <span
+          aria-hidden="true"
+          className={`absolute -top-[0.3em] left-[calc(50%_-_0.15em)] -translate-x-1/2 w-[0.55em] h-[0.16em] ${accent} -rotate-[50deg]`}
+          style={{ clipPath: 'polygon(0 50%, 100% 0, 100% 100%)' }}
+        />
+      </span>
+      <span className="relative inline-block">
+        I
+        <span
+          aria-hidden="true"
+          className={`absolute -top-[0.18em] left-[calc(50%_-_0.15em)] -translate-x-1/2 w-[0.32em] h-[0.32em] ${accent} rounded-full`}
+        />
+      </span>
+      <span>N</span>
+    </span>
+  );
+}
 
 export default function Navbar() {
   const { count } = useCart();
   const { wishlist } = useWishlist();
   const { customer, logout } = useCustomer();
+  const { addToast } = useToast();
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === '/';
@@ -60,15 +88,21 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/shop', label: 'Shop' },
+    { href: '/shop', label: 'Sale' },
+    { href: '/shop?category=Men', label: 'Men' },
     { href: '/shop?category=Women', label: 'Women' },
-    { href: '/shop?category=Kid', label: 'Kid' },
-    { href: '/shop?category=Unisex', label: 'Unisex' },
+    { href: '/shop?category=Kid', label: 'Kid', soon: true },
+    { href: '/shop?category=Accessories', label: 'Accessories', soon: true },
     { href: '/franchise', label: 'Franchise' },
     { href: '/cart', label: 'Cart' },
   ];
 
-  const desktopLinks = navLinks.slice(0, 4);
+  const desktopLinks = navLinks.slice(0, 6);
+
+  const handleSoonClick = (e, label) => {
+    e.preventDefault();
+    addToast(`${label} — coming soon`, 'success');
+  };
 
   return (
     <>
@@ -84,28 +118,39 @@ export default function Navbar() {
             {/* Logo */}
             <Link
               href="/"
-              className={`text-xl font-black tracking-[0.3em] uppercase transition-colors duration-500 ${
+              className={`transition-colors duration-500 ${
                 isTransparent ? 'text-white' : 'text-black'
               }`}
             >
-              Schein
+              <ScheinLogo />
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-10">
-              {desktopLinks.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={`text-[11px] tracking-[0.2em] uppercase transition-colors duration-300 ${
-                    isTransparent
-                      ? 'text-white/60 hover:text-white'
-                      : 'text-zinc-500 hover:text-black'
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              ))}
+            <nav className="hidden md:flex items-center gap-7 lg:gap-9">
+              {desktopLinks.map((l) => {
+                const baseCls = `relative text-[11px] tracking-[0.2em] uppercase transition-colors duration-300 ${
+                  isTransparent
+                    ? 'text-white/60 hover:text-white'
+                    : 'text-zinc-500 hover:text-black'
+                }`;
+                if (l.soon) {
+                  return (
+                    <button
+                      key={l.href}
+                      onClick={(e) => handleSoonClick(e, l.label)}
+                      className={baseCls}
+                    >
+                      {l.label}
+                      <span className="ml-1 text-[8px] tracking-[0.15em] text-orange-400 align-super">soon</span>
+                    </button>
+                  );
+                }
+                return (
+                  <Link key={l.href} href={l.href} className={baseCls}>
+                    {l.label}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Icons */}
@@ -249,9 +294,9 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
-              className="text-xl font-black tracking-[0.3em] uppercase text-white"
+              className="text-white"
             >
-              Schein
+              <ScheinLogo />
             </Link>
             <button
               onClick={() => setMenuOpen(false)}
@@ -264,23 +309,45 @@ export default function Navbar() {
 
           {/* Nav links — fills all remaining space */}
           <nav className="flex-1 flex flex-col justify-center px-8 overflow-y-auto">
-            {navLinks.map((l, i) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                onClick={() => setMenuOpen(false)}
-                className="animate-menu-item group flex items-center justify-between py-5 border-b border-white/[0.07]"
-                style={{ animationDelay: `${i * 0.06}s` }}
-              >
-                <span className="text-3xl font-black text-white/60 group-hover:text-white transition-colors duration-200 tracking-tight">
-                  {l.label}
-                </span>
-                <ArrowRight
-                  size={18}
-                  className="text-white/20 group-hover:text-white/50 group-hover:translate-x-1 transition-all duration-200"
-                />
-              </Link>
-            ))}
+            {navLinks.map((l, i) => {
+              const inner = (
+                <>
+                  <span className="text-2xl sm:text-3xl font-black text-white/60 group-hover:text-white transition-colors duration-200 tracking-tight flex items-center gap-2">
+                    {l.label}
+                    {l.soon && (
+                      <span className="text-[9px] tracking-[0.2em] text-orange-400 font-semibold">SOON</span>
+                    )}
+                  </span>
+                  <ArrowRight
+                    size={18}
+                    className="text-white/20 group-hover:text-white/50 group-hover:translate-x-1 transition-all duration-200"
+                  />
+                </>
+              );
+              if (l.soon) {
+                return (
+                  <button
+                    key={l.href}
+                    onClick={() => addToast(`${l.label} — coming soon`, 'success')}
+                    className="animate-menu-item group flex items-center justify-between py-5 border-b border-white/[0.07] text-left w-full"
+                    style={{ animationDelay: `${i * 0.06}s` }}
+                  >
+                    {inner}
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="animate-menu-item group flex items-center justify-between py-5 border-b border-white/[0.07]"
+                  style={{ animationDelay: `${i * 0.06}s` }}
+                >
+                  {inner}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Bottom section */}
@@ -289,7 +356,7 @@ export default function Navbar() {
             <div className="flex gap-8 mb-6">
               {[
                 { label: 'Instagram', href: 'https://www.instagram.com/schein_store' },
-                { label: 'Twitter / X', href: '#' },
+                { label: 'WhatsApp', href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '917301580009'}` },
                 { label: 'Facebook', href: '#' },
               ].map((s) => (
                 <a

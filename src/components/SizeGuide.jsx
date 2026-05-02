@@ -5,6 +5,14 @@ import { X, Ruler, ChevronRight } from 'lucide-react';
 
 // ─── Size chart data ────────────────────────────────────────────────────────
 const SIZE_CHART = {
+  Men: [
+    { size: 'XS', chest: [86, 91],   waist: [71, 76], hips: [86, 91],   height: [165, 170] },
+    { size: 'S',  chest: [91, 96],   waist: [76, 81], hips: [91, 96],   height: [168, 173] },
+    { size: 'M',  chest: [96, 101],  waist: [81, 86], hips: [96, 101],  height: [173, 178] },
+    { size: 'L',  chest: [101, 106], waist: [86, 91], hips: [101, 106], height: [178, 183] },
+    { size: 'XL', chest: [106, 111], waist: [91, 96], hips: [106, 111], height: [183, 188] },
+    { size: 'XXL',chest: [111, 118], waist: [96, 103],hips: [111, 118], height: [188, 193] },
+  ],
   Kid: [
     { size: 'XS', chest: [56, 60], waist: [52, 56], hips: [60, 64],  height: [104, 110] },
     { size: 'S',  chest: [60, 64], waist: [56, 60], hips: [64, 68],  height: [110, 116] },
@@ -80,7 +88,10 @@ export default function SizeGuide({ category }) {
   const [open,   setOpen]   = useState(false);
   const [tab,    setTab]    = useState('finder'); // 'finder' | 'chart'
   const [gender, setGender] = useState(
-    category === 'Kid' ? 'Kid' : category === 'Women' ? 'Women' : 'Unisex'
+    category === 'Kid' ? 'Kid'
+    : category === 'Women' ? 'Women'
+    : category === 'Men' ? 'Men'
+    : 'Unisex'
   );
   const [unit,   setUnit]   = useState('cm'); // 'cm' | 'in'
   const [form,   setForm]   = useState({ chest: '', waist: '', hips: '', height: '' });
@@ -169,7 +180,7 @@ export default function SizeGuide({ category }) {
                   {/* Gender + unit row */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex gap-2">
-                      {['Kid', 'Women', 'Unisex'].map((g) => (
+                      {['Men', 'Women', 'Kid', 'Unisex'].map((g) => (
                         <button
                           key={g}
                           onClick={() => { setGender(g); reset(); }}
@@ -282,7 +293,7 @@ export default function SizeGuide({ category }) {
                 <div>
                   {/* Gender selector */}
                   <div className="flex gap-2 mb-6">
-                    {['Kid', 'Women', 'Unisex'].map((g) => (
+                    {['Men', 'Women', 'Kid', 'Unisex'].map((g) => (
                       <button
                         key={g}
                         onClick={() => setGender(g)}
